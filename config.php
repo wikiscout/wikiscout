@@ -10,15 +10,31 @@ $adminUserIds = [1, 2, 3];
 // Webhook for error tracking (if you want it to notify you, I use a Discord webhook myself, but you can use any webhook)
 $webhook = 'https://your-webhook-url-here';
 
-$version = '1.0.1';
+$version = '2.0.0';
 
 $username = 'FIRST-username';
 $password = 'FIRST-password';
 
 $siteName = 'WikiScout';
-$emailAddress = 'support@chanrobotics.org';
+$emailAddress = 'support@example.org';
 $teamName = 'WikiScout Team';
-$supportUrl = 'https://wikiscout.chanrobotics.org';
+$supportUrl = 'https://wikiscout.example.org';
+
+// Public URL where the UI is served (for links in QR codes, profile URLs, etc.)
+$publicUrl = 'https://app.wikiscout.org';
+
+// Data mode: 'first_api' for live FIRST API data, 'demo' for demo/test data
+$dataMode = 'first_api';
+
+// OpenRouter API key (for AI image processing in profiles)
+$openrouterApiKey = '';
+
+// Local storage path for uploaded images (alternative to R2)
+$storagePath = __DIR__ . '/storage';
+
+// Refresh intervals (ms) — sent in /dashboard/me/ config
+$mobileRefreshInterval = 15000;
+$desktopRefreshInterval = 5000;
 
 $mysql = [
     'host' => 'localhost',

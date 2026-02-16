@@ -1,34 +1,31 @@
 <?php
-require_once '../../config.php';
+require_once __DIR__ . '/../../helpers.php';
+bootstrap();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $db = new PDO(
-            "mysql:host={$mysql['host']};dbname={$mysql['database']};port={$mysql['port']}",
-            $mysql['username'],
-            $mysql['password'],
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    errorResponse('Method not allowed', 405);
+}
 
-        $input = json_decode(file_get_contents('php://input'), true);
-        $teamNumber = htmlspecialchars(strip_tags($input['teamNumber']));
+try {
+    $db = getDb();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $teamNumber = isset($input['teamNumber']) ? strip_tags($input['teamNumber']) : null;
 
-        // Simply set team_number to NULL
-        $stmt = $db->prepare("UPDATE users SET team_number = NULL WHERE team_number = ?");
-        $stmt->execute([$teamNumber]);
-
-        if ($stmt->rowCount() > 0) {
-            http_response_code(200);
-            echo json_encode(['success' => true]);
-        } else {
-            http_response_code(404);
-            echo json_encode(['error' => 'Team not found']);
-        }
-
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Database error']);
-        error_log($e->getMessage());
+    if (!$teamNumber) {
+        errorResponse('Invalid input', 400);
     }
+
+    $stmt = $db->prepare("UPDATE users SET team_number = NULL WHERE team_number = ?");
+    $stmt->execute([$teamNumber]);
+
+    if ($stmt->rowCount() > 0) {
+        jsonResponse(['success' => true]);
+    } else {
+        errorResponse('Team not found', 404);
+    }
+
+} catch (Exception $e) {
+    error_log("Deactivate error: " . $e->getMessage());
+    errorResponse('Database error', 500);
 }
 ?>

@@ -1,60 +1,69 @@
 <?php
-require_once '../../config.php';
+require_once __DIR__ . '/../../helpers.php';
+bootstrap();
 
-// Set no-cache headers
-header("Cache-Control: no-cache, no-store, must-revalidate");
-header("Pragma: no-cache");
-header("Expires: 0");
-
-if (!isset($_COOKIE['auth'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'No auth cookie found']);
-    exit;
+$token = getAuthCookie();
+if (!$token) {
+    errorResponse('No auth cookie found', 401);
 }
 
-try {
-    $db = new PDO(
-        "mysql:host={$mysql['host']};dbname={$mysql['database']};port={$mysql['port']}",
-        $mysql['username'],
-        $mysql['password'],
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+$db = getDb();
 
-    // Validate token
-    $stmt = $db->prepare("
-        SELECT u.id, u.team_number, u.first_name, u.last_name
-        FROM auth_tokens at
-        JOIN users u ON at.user_id = u.id
-        WHERE at.token = ?
-        AND at.created_at <= CURRENT_TIMESTAMP
-        AND at.expires_at >= CURRENT_TIMESTAMP
-        AND at.is_revoked = 0
-    ");
-    
-    $stmt->execute([$_COOKIE['auth']]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+// Try main account first
+$stmt = $db->prepare("
+    SELECT u.id, u.team_number, u.first_name, u.last_name
+    FROM auth_tokens at
+    JOIN users u ON at.user_id = u.id
+    WHERE at.token = ?
+    AND at.user_id IS NOT NULL
+    AND at.created_at <= CURRENT_TIMESTAMP
+    AND at.expires_at >= CURRENT_TIMESTAMP
+    AND at.is_revoked = 0
+");
+$stmt->execute([$token]);
+$main = $stmt->fetch();
 
-    if (!$user) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Invalid or expired token']);
-        exit;
+if ($main) {
+    if ($main['team_number'] === null) {
+        errorResponse('No team number assigned', 501);
     }
-
-    if ($user['team_number'] === null) {
-        http_response_code(501);
-        echo json_encode(['error' => 'No team number assigned']);
-        exit;
-    }
-
-    echo json_encode([
+    $name = trim(($main['first_name'] ?? '') . ' ' . ($main['last_name'] ?? ''));
+    jsonResponse([
         'valid' => true,
-        'team_number' => $user['team_number']
+        'team_number' => $main['team_number'],
+        'name' => $name ?: 'Team Member',
+        'is_sub_account' => false,
     ]);
-
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Database error']);
-    error_log($e->getMessage());
-    exit;
 }
+
+// Try sub account
+$stmt = $db->prepare("
+    SELECT sa.id, sa.name, sa.assigned_teams, u.team_number
+    FROM auth_tokens at
+    JOIN sub_accounts sa ON at.sub_account_id = sa.id
+    JOIN users u ON sa.parent_user_id = u.id
+    WHERE at.token = ?
+    AND at.sub_account_id IS NOT NULL
+    AND at.created_at <= CURRENT_TIMESTAMP
+    AND at.expires_at >= CURRENT_TIMESTAMP
+    AND at.is_revoked = 0
+    AND sa.is_active = 1
+");
+$stmt->execute([$token]);
+$sub = $stmt->fetch();
+
+if ($sub) {
+    if ($sub['team_number'] === null) {
+        errorResponse('No team number assigned', 501);
+    }
+    jsonResponse([
+        'valid' => true,
+        'team_number' => $sub['team_number'],
+        'name' => $sub['name'],
+        'is_sub_account' => true,
+        'assigned_teams' => json_decode($sub['assigned_teams'] ?: '[]', true) ?: [],
+    ]);
+}
+
+errorResponse('Invalid or expired token', 401);
 ?>

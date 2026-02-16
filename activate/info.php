@@ -1,13 +1,12 @@
 <?php
-require_once '../config.php';
+require_once __DIR__ . '/../helpers.php';
+bootstrap();
 
-header('Content-Type: application/json');
+global $teamName, $emailAddress, $supportUrl;
 
-$response = [
+jsonResponse([
     'teamName' => $teamName,
     'emailAddress' => $emailAddress,
-    'supportUrl' => $supportUrl
-];
-
-echo json_encode($response);
+    'supportUrl' => $supportUrl,
+]);
 ?>

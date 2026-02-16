@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | WikiScout</title>
+  <link rel="stylesheet" href="css/variables.css?v=1771097114">
+  <link rel="stylesheet" href="css/base.css?v=1771097114">
+  <link rel="stylesheet" href="css/components.css?v=1771097114">
+  <link rel="stylesheet" href="css/dashboard.css?v=1771097114">
+</head>
+<body>
+  <!-- Global Loader -->
+  <div id="globalLoader" class="global-loader" style="display: flex;">
+    <div class="loader-content">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">Loading WikiScout...</div>
+    </div>
+  </div>
+
+  <!-- Desktop Update Toast -->
+  <div class="update-toast" id="updateToast" style="display:none;">
+    <span class="update-toast-text">Update available</span>
+    <button class="btn btn-sm btn-primary update-toast-btn" id="updateToastBtn">Refresh</button>
+  </div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">W</div>
+          <div class="sidebar-logo-text">Wiki<span>Scout</span></div>
+        </div>
+      </div>
+      
+      <!-- Event Selector -->
+      <div class="event-selector" id="eventSelector">
+        <div class="event-selector-icon">E</div>
+        <div class="event-selector-info">
+          <div class="event-selector-name" id="currentEventName">Demo Event 2024</div>
+        </div>
+        <span class="event-selector-chevron" data-icon="chevronDown" data-icon-size="16"></span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a href="#" class="nav-item active" data-page="overview">
+            <span class="nav-item-icon" data-icon="home" data-icon-size="18"></span>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" class="nav-item" data-page="rankings">
+            <span class="nav-item-icon" data-icon="rankings" data-icon-size="18"></span>
+            <span>Rankings</span>
+          </a>
+          <a href="#" class="nav-item" data-page="matches">
+            <span class="nav-item-icon" data-icon="calendar" data-icon-size="18"></span>
+            <span>Matches</span>
+          </a>
+          <a href="#" class="nav-item" data-page="teams">
+            <span class="nav-item-icon" data-icon="teams" data-icon-size="18"></span>
+            <span>Teams</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Scouting</div>
+          <a href="#" class="nav-item" data-page="scout">
+            <span class="nav-item-icon" data-icon="scout" data-icon-size="18"></span>
+            <span>Scout Team</span>
+          </a>
+          <a href="#" class="nav-item" data-page="match-scout">
+            <span class="nav-item-icon" data-icon="edit" data-icon-size="18"></span>
+            <span>Match Scouting</span>
+          </a>
+          <a href="#" class="nav-item" data-page="data">
+            <span class="nav-item-icon" data-icon="data" data-icon-size="18"></span>
+            <span>View Data</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Team</div>
+          <a href="#" class="nav-item" data-page="profile">
+            <span class="nav-item-icon" data-icon="card" data-icon-size="18"></span>
+            <span>Trading Card</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="#" class="nav-item" data-page="otp">
+            <span class="nav-item-icon" data-icon="teams" data-icon-size="18"></span>
+            <span>Team Members</span>
+          </a>
+          <a href="#" class="nav-item" data-page="settings">
+            <span class="nav-item-icon" data-icon="settings" data-icon-size="18"></span>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="userAvatar">T</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="userName">Team Member</div>
+            <div class="sidebar-user-team" id="userTeam">Team ----</div>
+          </div>
+          <div class="sidebar-user-action" id="logoutBtn">
+            <span data-icon="logout" data-icon-size="16"></span>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <header class="page-header">
+        <div class="page-header-left">
+          <h1 class="page-title" id="pageTitle">Dashboard</h1>
+          <p class="page-subtitle" id="pageSubtitle">Welcome back! Here's what's happening.</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary" id="refreshBtn">
+            <span data-icon="refresh" data-icon-size="16"></span>
+            Refresh
+          </button>
+        </div>
+      </header>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Overview Page -->
+        <div class="screen active" id="page-overview">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-content">
+                <div class="stat-label">Total Teams</div>
+                <div class="stat-value" id="statTeams">16</div>
+                <div class="stat-change positive">
+                  <span data-icon="arrowUp" data-icon-size="14"></span>
+                  <span>Event loaded</span>
+                </div>
+              </div>
+              <div class="stat-icon blue">
+                <span data-icon="teams" data-icon-size="24"></span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-content">
+                <div class="stat-label">Your Rank</div>
+                <div class="stat-value" id="statRank">#3</div>
+                <div class="stat-change positive">
+                  <span data-icon="arrowUp" data-icon-size="14"></span>
+                  <span>+2 from yesterday</span>
+                </div>
+              </div>
+              <div class="stat-icon green">
+                <span data-icon="rankings" data-icon-size="24"></span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-content">
+                <div class="stat-label">Matches Played</div>
+                <div class="stat-value" id="statMatches">8</div>
+                <div class="stat-change positive">
+                  <span data-icon="arrowUp" data-icon-size="14"></span>
+                  <span>6W 2L</span>
+                </div>
+              </div>
+              <div class="stat-icon purple">
+                <span data-icon="calendar" data-icon-size="24"></span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-content">
+                <div class="stat-label">Scouting Entries</div>
+                <div class="stat-value" id="statScouting">24</div>
+                <div class="stat-change positive">
+                  <span data-icon="arrowUp" data-icon-size="14"></span>
+                  <span>+5 today</span>
+                </div>
+              </div>
+              <div class="stat-icon amber">
+                <span data-icon="scout" data-icon-size="24"></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Actions -->
+          <div class="quick-actions">
+            <button class="quick-action-btn" data-page="scout">
+              <span class="quick-action-icon" data-icon="scout" data-icon-size="20"></span>
+              <span>Scout Team</span>
+            </button>
+            <button class="quick-action-btn" data-page="matches">
+              <span class="quick-action-icon" data-icon="calendar" data-icon-size="20"></span>
+              <span>Matches</span>
+            </button>
+            <button class="quick-action-btn" data-page="rankings">
+              <span class="quick-action-icon" data-icon="rankings" data-icon-size="20"></span>
+              <span>Rankings</span>
+            </button>
+            <button class="quick-action-btn" data-page="members">
+              <span class="quick-action-icon" data-icon="teams" data-icon-size="20"></span>
+              <span>Team Members</span>
+            </button>
+            <button class="quick-action-btn" data-page="profile">
+              <span class="quick-action-icon" data-icon="card" data-icon-size="20"></span>
+              <span>Trading Card</span>
+            </button>
+            <button class="quick-action-btn" data-page="data">
+              <span class="quick-action-icon" data-icon="data" data-icon-size="20"></span>
+              <span>View Data</span>
+            </button>
+          </div>
+
+          <!-- Queuing Soon Banner -->
+          <div id="queuingSoonBanner" class="queuing-soon-banner" style="display:none;">
+            <div class="queuing-soon-icon" data-icon="alertCircle" data-icon-size="20"></div>
+            <div class="queuing-soon-content">
+              <span class="queuing-soon-label">Queuing Soon</span>
+              <span class="queuing-soon-detail" id="queuingSoonDetail"></span>
+            </div>
+          </div>
+
+          <!-- Row 1: Upcoming Matches - Single Row -->
+          <div id="upcomingMatchesCard" class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Upcoming Matches</h3>
+                  <button class="btn btn-ghost btn-sm" data-page="matches">View All</button>
+                </div>
+            <div class="card-body" style="padding: var(--space-md);">
+              <div class="upcoming-matches-row" id="upcomingMatches">
+                  <div class="empty-state">
+                    <div class="empty-state-icon" data-icon="calendar" data-icon-size="48"></div>
+                    <div class="empty-state-title">No upcoming matches</div>
+                    <div class="empty-state-text">Check back later for match schedule</div>
+                </div>
+                  </div>
+                </div>
+              </div>
+              
+          <!-- Row 2: Recent Results | Rankings | Score Overview - 3 equal columns -->
+          <div class="overview-three-col">
+            <!-- Recent Results -->
+              <div class="card">
+                <div class="card-header">
+                <h3 class="card-title">Recent Results</h3>
+                <button class="btn btn-ghost btn-sm" data-page="matches">View All</button>
+                </div>
+              <div class="card-body" style="padding: var(--space-sm);" id="recentResults">
+                <div class="empty-state" style="padding: var(--space-xl);">
+                  <div class="empty-state-icon" data-icon="data" data-icon-size="32"></div>
+                  <div class="empty-state-text">No completed matches yet</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Top Rankings -->
+              <div class="card">
+                <div class="card-header">
+                <h3 class="card-title">Top Rankings</h3>
+                <button class="btn btn-ghost btn-sm" data-page="rankings">View All</button>
+                </div>
+              <div class="card-body" style="padding: 0;" id="topRankings">
+                <!-- Rankings will be rendered here -->
+                </div>
+              </div>
+              
+            <!-- Score Overview -->
+              <div class="card">
+                <div class="card-header">
+                <h3 class="card-title">Score Overview</h3>
+                </div>
+              <div class="card-body" id="scoreAnalysis">
+                <div class="empty-state">
+                  <div class="empty-state-text">Waiting for match data</div>
+                    </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Rankings Page -->
+        <div class="screen" id="page-rankings">
+          <div class="rankings-page-layout">
+            <!-- Left Sidebar: Your Team & Event Stats -->
+            <div class="rankings-sidebar">
+              <div class="card rankings-your-team">
+                <div class="card-header">
+                  <h3 class="card-title">Your Team</h3>
+                  <span class="badge badge-primary" id="yourTeamBadge">Team ----</span>
+                </div>
+                <div class="card-body">
+                  <div class="your-team-rank">
+                    <div class="your-team-rank-number" id="yourTeamRank">#5</div>
+                    <div class="your-team-rank-label">Event Rank</div>
+                  </div>
+                  <div class="your-team-stats">
+                    <div class="your-team-stat">
+                      <div class="your-team-stat-value wins" id="yourTeamWins">6</div>
+                      <div class="your-team-stat-label">Wins</div>
+                    </div>
+                    <div class="your-team-stat">
+                      <div class="your-team-stat-value losses" id="yourTeamLosses">2</div>
+                      <div class="your-team-stat-label">Losses</div>
+                    </div>
+                    <div class="your-team-stat">
+                      <div class="your-team-stat-value" id="yourTeamTies">1</div>
+                      <div class="your-team-stat-label">Ties</div>
+                    </div>
+                  </div>
+                  <div class="your-team-record">
+                    <div class="your-team-record-bar">
+                      <div class="your-team-record-wins" id="yourTeamWinBar" style="width: 66%;"></div>
+                      <div class="your-team-record-ties" id="yourTeamTieBar" style="width: 11%;"></div>
+                    </div>
+                    <div class="your-team-record-text" id="yourTeamRecordText">Win Rate: 66%</div>
+                  </div>
+                  
+                  <!-- OPR & SoS Stats -->
+                  <div class="your-team-advanced" id="yourTeamAdvancedCard" style="display: none;">
+                    <div class="your-team-advanced-divider"></div>
+                    <div class="your-team-stats">
+                      <div class="your-team-stat">
+                        <div class="your-team-stat-value" id="yourTeamOPR" style="color: var(--purple);">--</div>
+                        <div class="your-team-stat-label">OPR</div>
+                </div>
+                      <div class="your-team-stat">
+                        <div class="your-team-stat-value" id="yourTeamOPRRank" style="color: var(--purple);">#--</div>
+                        <div class="your-team-stat-label">OPR Rank</div>
+              </div>
+                      <div class="your-team-stat">
+                        <div class="your-team-stat-value" id="yourTeamSoS">--</div>
+                        <div class="your-team-stat-label">Schedule</div>
+                </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Event Stats</h3>
+                </div>
+                <div class="card-body">
+                  <div class="event-stat-row">
+                    <span class="event-stat-label">Total Matches</span>
+                    <span class="event-stat-value" id="totalMatchesPlayed">48</span>
+                  </div>
+                  <div class="event-stat-row">
+                    <span class="event-stat-label">Avg Score</span>
+                    <span class="event-stat-value" id="avgMatchScore">127</span>
+                  </div>
+                  <div class="event-stat-row">
+                    <span class="event-stat-label">High Score</span>
+                    <span class="event-stat-value" id="highScore">186</span>
+                  </div>
+                  <div class="event-stat-row">
+                    <span class="event-stat-label">Qualification Progress</span>
+                    <span class="event-stat-value" id="qualProgress">67%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Main: Three Leaderboards Side by Side -->
+            <div class="leaderboards-grid">
+              <!-- Event Rankings -->
+              <div class="card leaderboard-card">
+                <div class="card-header leaderboard-header-event">
+                  <div>
+                    <h3 class="card-title">
+                      <span class="leaderboard-icon" data-icon="rankings" data-icon-size="16"></span>
+                      Event Rankings
+                    </h3>
+                    <p class="card-subtitle">Official standings</p>
+                  </div>
+                  <span class="badge badge-secondary" id="rankingsCount">-- teams</span>
+                </div>
+                <div class="card-body leaderboard-body" id="rankingsTable">
+                  <!-- Rankings will be rendered here -->
+                </div>
+              </div>
+              
+              <!-- OPR Rankings -->
+              <div class="card leaderboard-card">
+                <div class="card-header leaderboard-header-opr">
+                  <div>
+                    <h3 class="card-title">
+                      <span class="leaderboard-icon" data-icon="zap" data-icon-size="16"></span>
+                      OPR
+                    </h3>
+                    <p class="card-subtitle">Offensive Power Rating</p>
+            </div>
+                  <span class="badge badge-purple" id="oprCount">-- teams</span>
+                </div>
+                <div class="card-body leaderboard-body" id="oprTable">
+                  <!-- OPR will be rendered here -->
+                </div>
+              </div>
+              
+              <!-- Strength of Schedule -->
+              <div class="card leaderboard-card">
+                <div class="card-header leaderboard-header-sos">
+                  <div>
+                    <h3 class="card-title">
+                      <span class="leaderboard-icon" data-icon="target" data-icon-size="16"></span>
+                      Strength of Schedule
+                    </h3>
+                    <p class="card-subtitle">Alliance matchup luck</p>
+                  </div>
+                  <span class="badge badge-cyan" id="sosCount">-- teams</span>
+                </div>
+                <div class="card-body leaderboard-body" id="sosTable">
+                  <!-- SoS will be rendered here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Matches Page -->
+        <div class="screen" id="page-matches">
+          <div class="matches-page-layout">
+            <!-- Completed Matches Section -->
+            <div class="matches-section">
+              <div class="matches-section-header">
+                <h3 class="matches-section-title">Completed Matches</h3>
+                <span class="badge badge-success" id="completedMatchesCount">0 played</span>
+              </div>
+              <div class="matches-grid" id="completedMatchesGrid">
+                <!-- Completed matches will be rendered here -->
+              </div>
+            </div>
+            
+            <!-- Upcoming Matches Section -->
+            <div class="matches-section">
+              <div class="matches-section-header">
+                <h3 class="matches-section-title">Upcoming Matches</h3>
+                <span class="badge badge-warning" id="upcomingMatchesCount">0 scheduled</span>
+              </div>
+              <div class="matches-grid" id="upcomingMatchesGrid">
+                <!-- Upcoming matches will be rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Teams Page -->
+        <div class="screen" id="page-teams">
+          <div class="teams-page-wrapper">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">All Teams</h3>
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                  <div class="search-input" style="width: 200px;">
+                    <span class="search-input-icon" data-icon="search" data-icon-size="16"></span>
+                    <input type="text" placeholder="Search teams..." id="teamsSearch">
+                  </div>
+              <span class="badge badge-secondary" id="teamsCount">-- teams</span>
+            </div>
+              </div>
+              <div class="card-body" style="padding: 0;">
+                <div id="teamsGrid">
+                <!-- Teams will be rendered here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Scout Page -->
+        <div class="screen" id="page-scout">
+          <div class="scout-layout">
+            <!-- Column 1: Scouting Form -->
+            <div class="scout-form-container">
+              <form id="scoutForm">
+                <div id="scoutFormSections">
+                  <!-- Form sections will be rendered here -->
+                </div>
+              </form>
+            </div>
+            
+            <!-- Column 2: Notes + Custom Fields -->
+            <div class="scout-notes-panel">
+              <div class="scout-section">
+                <div class="scout-section-header">
+                  <span class="scout-section-icon" data-icon="edit" data-icon-size="18"></span>
+                  <span class="scout-section-title">Notes</span>
+                </div>
+                <div class="scout-section-body">
+                  <div class="form-group">
+                    <label class="form-label">Public Notes</label>
+                    <div class="form-hint">Visible to your team members</div>
+                    <textarea class="form-input form-textarea" id="scoutPublicNotes" rows="6" placeholder="Share observations with your team..."></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Private Notes</label>
+                    <div class="form-hint">Only visible to you</div>
+                    <textarea class="form-input form-textarea" id="scoutPrivateNotes" rows="6" placeholder="Personal notes..."></textarea>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Custom Fields Section (loaded dynamically) -->
+              <div class="scout-section" id="scoutCustomFieldsSection" style="display: none;">
+                <div class="scout-section-header">
+                  <span class="scout-section-icon" data-icon="settings" data-icon-size="18"></span>
+                  <span class="scout-section-title">Custom Fields</span>
+                  <span class="badge badge-secondary">Private</span>
+                </div>
+                <div class="scout-section-body" id="scoutCustomFieldsContainer">
+                  <!-- Custom fields will be rendered here -->
+                </div>
+              </div>
+            </div>
+            
+            <!-- Column 3: Match History -->
+            <div class="scout-history-panel">
+              <div class="scout-section" id="scoutMatchHistorySection">
+                <div class="scout-section-header">
+                  <span class="scout-section-icon" data-icon="calendar" data-icon-size="18"></span>
+                  <span class="scout-section-title">Match History</span>
+                  <span class="badge badge-secondary" id="scoutMatchHistoryCount">0</span>
+                </div>
+                <div class="scout-match-history-list" id="scoutMatchHistoryList">
+                  <div class="empty-state" style="padding: var(--space-xl);">
+                    <div class="empty-state-icon" data-icon="users" data-icon-size="32"></div>
+                    <div class="empty-state-text">Select a team to see their match history</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Column 4: Team Select + Preview + Submit -->
+            <div class="scout-sidebar">
+              <div class="scout-team-select">
+                <div class="scout-team-select-label">Team to Scout</div>
+                <select class="form-input form-select" id="scoutTeamSelect" required>
+                  <option value="">Select a team...</option>
+                </select>
+              </div>
+              
+              <div class="scout-preview">
+                <div class="scout-preview-header">
+                  <span class="scout-preview-title">Preview</span>
+                  <span class="badge badge-secondary">Draft</span>
+                </div>
+                <div class="scout-preview-body" id="scoutPreview">
+                  <div class="empty-state" style="padding: var(--space-xl);">
+                    <div class="empty-state-icon" data-icon="clipboard" data-icon-size="32"></div>
+                    <div class="empty-state-text">Fill the form to see preview</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="scout-submit">
+                <div class="scout-submit-team" id="scoutSubmitTeam">No team selected</div>
+                <div class="scout-submit-event" id="scoutSubmitEvent">Demo Event 2024</div>
+                <button type="submit" form="scoutForm" class="btn">
+                  <span data-icon="check" data-icon-size="16"></span>
+                  Submit Scouting Data
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Match Scouting Page -->
+        <div class="screen" id="page-match-scout">
+          <div class="match-scout-layout">
+            <!-- Match List (left) -->
+            <div class="match-scout-list">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Matches</h3>
+                  <span class="badge badge-secondary" id="matchScoutCount">--</span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                  <div class="match-scout-filters">
+                    <button class="match-scout-filter active" data-filter="all">All</button>
+                    <button class="match-scout-filter" data-filter="completed">Completed</button>
+                    <button class="match-scout-filter" data-filter="upcoming">Upcoming</button>
+                    <button class="match-scout-filter" data-filter="noted">With Notes</button>
+                  </div>
+                  <div class="match-scout-match-list" id="matchScoutMatchList">
+                    <!-- Match list items rendered here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Notes Area (right) -->
+            <div class="match-scout-notes">
+              <div id="matchScoutContent">
+                <div class="empty-state" style="padding: var(--space-3xl);">
+                  <div class="empty-state-icon" data-icon="edit" data-icon-size="48"></div>
+                  <div class="empty-state-title">Select a Match</div>
+                  <div class="empty-state-text">Choose a match from the list to add notes for each team</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- View Data Page -->
+        <div class="screen" id="page-data">
+          <div class="data-layout">
+            <div class="data-browser">
+              <div class="data-browser-header">
+                <span class="data-browser-title">Teams</span>
+                <span class="data-browser-count" id="dataBrowserCount">16</span>
+              </div>
+              <div class="data-browser-search">
+                <div class="search-input">
+                  <span class="search-input-icon" data-icon="search" data-icon-size="16"></span>
+                  <input type="text" placeholder="Search teams..." id="dataBrowserSearch">
+                </div>
+              </div>
+              <div class="data-browser-list" id="dataBrowserList">
+                <!-- Teams will be rendered here -->
+              </div>
+            </div>
+            
+            <div class="data-main">
+              <div class="data-header" id="dataHeader" style="display: none;">
+                <div class="data-header-avatar" id="dataTeamAvatar">?</div>
+                <div class="data-header-info">
+                  <h2 class="data-header-team" id="dataTeamNumber">Team ---</h2>
+                  <div class="data-header-badges">
+                    <span class="badge badge-secondary" id="dataTeamRank">#--</span>
+                    <span class="badge badge-primary" id="dataTeamRecord">-W -L -T</span>
+                  </div>
+                </div>
+                <div class="data-header-actions">
+                  <button class="btn btn-secondary" id="dataMatchHistoryBtn">
+                    <span data-icon="history" data-icon-size="16"></span>
+                    Match History
+                  </button>
+                  <button class="btn btn-primary" id="dataScoutBtn">
+                    <span data-icon="scout" data-icon-size="16"></span>
+                    Scout
+                  </button>
+                </div>
+              </div>
+              
+              <div class="data-content" id="dataContent">
+                <div class="empty-state">
+                  <div class="empty-state-icon" data-icon="data" data-icon-size="64"></div>
+                  <div class="empty-state-title">Select a Team</div>
+                  <div class="empty-state-text">Choose a team from the list to view their scouting data</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="data-stats">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Statistics</h3>
+                </div>
+                <div class="card-body" id="dataStatsContent">
+                  <div class="empty-state" style="padding: var(--space-lg);">
+                    <div class="empty-state-text">Select a team</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Match Notes</h3>
+                  <span class="badge badge-secondary" id="dataMatchNotesCount">0</span>
+                </div>
+                <div class="card-body" style="padding: 0;" id="dataMatchNotesPanel">
+                  <div class="data-match-list" id="dataMatchList">
+                  <div class="empty-state" style="padding: var(--space-lg);">
+                      <div class="empty-state-text">Select a team to see matches</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Team Members Page -->
+        <div class="screen" id="page-otp">
+          <div class="team-members-layout">
+            <!-- Left: Member List -->
+            <div class="team-members-sidebar">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Team Members</h3>
+                  <span class="badge badge-primary" id="memberCount">0</span>
+              </div>
+                <div class="card-body" style="padding: 0;">
+                  <div class="member-list" id="memberList">
+                    <div class="empty-state" style="padding: var(--space-xl);">
+                      <div class="empty-state-icon" data-icon="teams" data-icon-size="32"></div>
+                      <div class="empty-state-title" style="font-size: var(--text-sm);">No members yet</div>
+                      <div class="empty-state-text" style="font-size: var(--text-xs);">Add team members to get started</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Add Member -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Add Member</h3>
+                </div>
+                <div class="card-body">
+                  <form id="addMemberForm">
+                    <div class="form-group">
+                      <label class="form-label">Name</label>
+                      <input type="text" class="form-input" id="newMemberName" placeholder="Scout name" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" id="addMemberBtn">
+                      <span data-icon="plus" data-icon-size="16"></span>
+                      Add Member
+                      </button>
+                  </form>
+                  <div class="form-hint" style="margin-top: var(--space-sm); text-align: center;">
+                    You can assign teams after creating the member
+                    </div>
+                  </div>
+                </div>
+            </div>
+            
+            <!-- Right: Member Details / Share -->
+            <div class="team-members-detail">
+              <!-- No member selected state -->
+              <div id="memberDetailEmpty">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="empty-state" style="padding: var(--space-2xl);">
+                      <div class="empty-state-icon" data-icon="user" data-icon-size="48"></div>
+                      <div class="empty-state-title">Select a Team Member</div>
+                      <div class="empty-state-text">Click on a member from the list to view their details and share login credentials</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Member detail view -->
+              <div id="memberDetailView" style="display: none;">
+                <div class="member-detail-layout">
+                  <!-- Left: Member Info -->
+                  <div class="member-detail-main">
+                    <!-- Member Info Card -->
+                    <div class="card">
+                      <div class="card-header">
+                        <div>
+                          <h3 class="card-title" id="memberDetailName">Member Name</h3>
+                          <p class="card-subtitle" id="memberDetailCreated">Added on --</p>
+                        </div>
+                        <div class="member-detail-actions">
+                          <span class="badge" id="memberDetailStatus">Active</span>
+                        </div>
+                      </div>
+                      <div class="card-body">
+                        <div class="member-detail-info">
+                          <div class="member-detail-row">
+                            <span class="member-detail-label">Assigned Teams</span>
+                            <span class="member-detail-value" id="memberDetailTeams">All teams</span>
+                          </div>
+                          <div class="member-detail-row">
+                            <span class="member-detail-label">Last Login</span>
+                            <span class="member-detail-value" id="memberDetailLastLogin">Never</span>
+                          </div>
+                        </div>
+                        
+                        <div class="member-detail-buttons">
+                          <button class="btn btn-primary btn-sm" id="memberAssignTeamsBtn" onclick="app.openAssignTeamsModal()">
+                            <span data-icon="teams" data-icon-size="14"></span>
+                            Assign Teams
+                          </button>
+                          <button class="btn btn-secondary btn-sm" id="memberToggleBtn">
+                            <span data-icon="pause" data-icon-size="14"></span>
+                            Deactivate
+                          </button>
+                          <button class="btn btn-danger btn-sm" id="memberDeleteBtn">
+                            <span data-icon="trash" data-icon-size="14"></span>
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Additional member data can go here -->
+                  </div>
+                  
+                  <!-- Right: Login Credentials Sidebar -->
+                  <div class="member-detail-sidebar">
+                    <div class="member-detail-sidebar-sticky">
+                      <div class="card">
+                        <div class="card-header">
+                          <h3 class="card-title">Login Credentials</h3>
+                        </div>
+                        <div class="card-body">
+                          <p class="member-share-info">Share these credentials with your team member so they can log in and scout.</p>
+                          
+                          <!-- QR Code -->
+                          <div class="member-share-code-section">
+                            <div class="member-share-code-header">
+                              <span data-icon="qrcode" data-icon-size="18"></span>
+                              <h4>QR Code Login</h4>
+                            </div>
+                            <p class="member-share-code-desc">They scan this QR code to instantly log in.</p>
+                            <div class="member-share-qr" id="memberQrCode">
+                              <div class="empty-state" style="padding: var(--space-lg);">
+                                <div class="empty-state-text" style="font-size: var(--text-xs);">Click "Generate" to create credentials</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- OTP Code -->
+                          <div class="member-share-code-section">
+                            <div class="member-share-code-header">
+                              <span data-icon="key" data-icon-size="18"></span>
+                              <h4>OTP Code</h4>
+                            </div>
+                            <p class="member-share-code-desc">They enter this code at <strong>app.wikiscout.org/code.html</strong></p>
+                            <div class="member-otp-display" id="memberOtpDisplay">
+                              <span class="member-otp-code" id="memberOtpCode">------</span>
+                              <button class="btn btn-ghost btn-sm btn-icon" id="memberOtpCopy" title="Copy OTP">
+                                <span data-icon="copy" data-icon-size="14"></span>
+                              </button>
+                            </div>
+                            <div class="member-otp-expires" id="memberOtpExpires"></div>
+                          </div>
+                          
+                          <button class="btn btn-primary" id="memberGenCredsBtn" style="width: 100%;">
+                            <span data-icon="refresh" data-icon-size="16"></span>
+                            Generate New Credentials
+                          </button>
+                          
+                          <div class="member-share-warning">
+                            <span data-icon="alert" data-icon-size="14"></span>
+                            <span>These credentials grant access to scout under your team. Keep them secure.</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Settings Page -->
+        <div class="screen" id="page-settings">
+          <div class="settings-layout">
+            <nav class="settings-nav">
+              <a href="#" class="settings-nav-item active" data-settings-section="profile">
+                <span data-icon="user" data-icon-size="18"></span>
+                <span>Profile</span>
+              </a>
+              <a href="#" class="settings-nav-item" data-settings-section="account">
+                <span data-icon="key" data-icon-size="18"></span>
+                <span>Account</span>
+              </a>
+              <a href="#" class="settings-nav-item" data-settings-section="preferences">
+                <span data-icon="settings" data-icon-size="18"></span>
+                <span>Preferences</span>
+              </a>
+              <a href="#" class="settings-nav-item" data-settings-section="custom-questions">
+                <span data-icon="edit" data-icon-size="18"></span>
+                <span>Custom Questions</span>
+              </a>
+              <a href="#" class="settings-nav-item" data-settings-section="about">
+                <span data-icon="info" data-icon-size="18"></span>
+                <span>About</span>
+              </a>
+            </nav>
+            
+            <div class="settings-content">
+              <!-- Profile Section -->
+              <div class="settings-section active" id="settings-profile">
+                <div class="settings-section-header">
+                  <h2 class="settings-section-title">Profile</h2>
+                  <p class="settings-section-subtitle">Manage your personal information</p>
+                </div>
+                
+                <div class="settings-card">
+                  <div class="settings-card-body">
+                    <div class="settings-profile">
+                      <div class="settings-avatar" id="settingsAvatar">
+                        <span id="settingsAvatarLetter">T</span>
+                        <button type="button" class="settings-avatar-edit">
+                          <span data-icon="edit" data-icon-size="10"></span>
+                        </button>
+                      </div>
+                      <div class="settings-profile-info">
+                        <h3 id="settingsDisplayName">Team Member</h3>
+                        <p id="settingsTeamInfo">Team #4509</p>
+                      </div>
+                    </div>
+                    
+                    <div class="settings-form">
+                      <div class="form-group">
+                        <label class="form-label">Display Name</label>
+                        <input type="text" class="form-input" id="settingsName" placeholder="Your name">
+                      </div>
+                      
+                      <div class="settings-form-row">
+                        <div class="form-group">
+                          <label class="form-label">Team Number</label>
+                          <input type="text" class="form-input" id="settingsTeamNumber" disabled>
+                          <div class="form-hint">Contact admin to change</div>
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">Role</label>
+                          <select class="form-input form-select" id="settingsRole">
+                            <option value="scout">Scout</option>
+                            <option value="lead">Lead Scout</option>
+                            <option value="mentor">Mentor</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <button class="btn btn-primary">Save Changes</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Account Section -->
+              <div class="settings-section" id="settings-account">
+                <div class="settings-section-header">
+                  <h2 class="settings-section-title">Account</h2>
+                  <p class="settings-section-subtitle">Manage your account security</p>
+                </div>
+                
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h4 class="settings-card-title">Email Address</h4>
+                  </div>
+                  <div class="settings-card-body">
+                    <div class="form-group">
+                      <input type="email" class="form-input" id="settingsEmail" placeholder="your@email.com">
+                    </div>
+                    <button class="btn btn-secondary">Update Email</button>
+                  </div>
+                </div>
+                
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h4 class="settings-card-title">Change Password</h4>
+                  </div>
+                  <div class="settings-card-body">
+                    <div class="settings-form">
+                      <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" class="form-input" placeholder="Enter current password">
+                      </div>
+                      <div class="settings-form-row">
+                        <div class="form-group">
+                          <label class="form-label">New Password</label>
+                          <input type="password" class="form-input" placeholder="Enter new password">
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">Confirm Password</label>
+                          <input type="password" class="form-input" placeholder="Confirm password">
+                        </div>
+                      </div>
+                      <button class="btn btn-secondary">Update Password</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Preferences Section -->
+              <div class="settings-section" id="settings-preferences">
+                <div class="settings-section-header">
+                  <h2 class="settings-section-title">Preferences</h2>
+                  <p class="settings-section-subtitle">Customize your experience</p>
+                </div>
+                
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h4 class="settings-card-title">Appearance</h4>
+                  </div>
+                  <div class="settings-card-body">
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <h4>Dark Mode</h4>
+                        <p>Use dark theme across the app</p>
+                      </div>
+                      <label class="toggle">
+                        <input type="checkbox" id="settingsDarkMode" checked>
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h4 class="settings-card-title">Notifications</h4>
+                  </div>
+                  <div class="settings-card-body">
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <h4>Match Notifications</h4>
+                        <p>Get notified when your matches are about to start</p>
+                      </div>
+                      <label class="toggle">
+                        <input type="checkbox" id="settingsMatchNotif">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <h4>Ranking Updates</h4>
+                        <p>Notify when your team's ranking changes</p>
+                      </div>
+                      <label class="toggle">
+                        <input type="checkbox" id="settingsRankNotif">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Custom Questions Section -->
+              <div class="settings-section" id="settings-custom-questions">
+                <div class="settings-section-header">
+                  <h2 class="settings-section-title">Custom Questions</h2>
+                  <p class="settings-section-subtitle">Add custom fields to your scouting form. These are private to your team.</p>
+                </div>
+                
+                <div class="settings-card">
+                  <div class="settings-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 class="settings-card-title">Your Custom Fields</h4>
+                    <button class="btn btn-primary btn-sm" id="addCustomQuestionBtn">
+                      <span data-icon="plus" data-icon-size="14"></span>
+                      Add Field
+                    </button>
+                  </div>
+                  <div class="settings-card-body">
+                    <div id="customQuestionsList">
+                      <div class="empty-state" style="padding: var(--space-xl);">
+                        <div class="empty-state-icon" data-icon="edit" data-icon-size="48"></div>
+                        <div class="empty-state-title">No custom fields yet</div>
+                        <div class="empty-state-text">Add boolean toggles, sliders, dropdowns, number fields, or text fields to your scouting form</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Add/Edit Question Form (hidden by default) -->
+                <div class="settings-card" id="customQuestionForm" style="display: none;">
+                  <div class="settings-card-header">
+                    <h4 class="settings-card-title" id="cqFormTitle">Add Custom Field</h4>
+                  </div>
+                  <div class="settings-card-body">
+                    <div class="settings-form">
+                      <div class="form-group">
+                        <label class="form-label">Field Label</label>
+                        <input type="text" class="form-input" id="cqLabel" placeholder="e.g. Intake Speed, Can Score High, Preferred Position...">
+                      </div>
+                      
+                      <div class="form-group">
+                        <label class="form-label">Field Type</label>
+                        <select class="form-input form-select" id="cqFieldType">
+                          <option value="">Select a type...</option>
+                          <option value="boolean">Toggle (Yes/No)</option>
+                          <option value="slider">Slider (Range)</option>
+                          <option value="dropdown">Dropdown (Multiple Choice)</option>
+                          <option value="number">Number</option>
+                          <option value="text">Text</option>
+                        </select>
+                      </div>
+                      
+                      <!-- Slider config (hidden by default) -->
+                      <div id="cqSliderConfig" style="display: none;">
+                        <div class="settings-form-row">
+                          <div class="form-group">
+                            <label class="form-label">Min</label>
+                            <input type="number" class="form-input" id="cqSliderMin" value="0">
+                          </div>
+                          <div class="form-group">
+                            <label class="form-label">Max</label>
+                            <input type="number" class="form-input" id="cqSliderMax" value="10">
+                          </div>
+                          <div class="form-group">
+                            <label class="form-label">Step</label>
+                            <input type="number" class="form-input" id="cqSliderStep" value="1" min="0.1" step="0.1">
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Dropdown config (hidden by default) -->
+                      <div id="cqDropdownConfig" style="display: none;">
+                        <div class="form-group">
+                          <label class="form-label">Options (one per line)</label>
+                          <textarea class="form-input form-textarea" id="cqDropdownOptions" rows="4" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
+                          <div class="form-hint">Enter each option on a separate line</div>
+                        </div>
+                      </div>
+                      
+                      <input type="hidden" id="cqEditId" value="">
+                      
+                      <div style="display: flex; gap: var(--space-md);">
+                        <button class="btn btn-primary" id="cqSaveBtn">
+                          <span data-icon="check" data-icon-size="16"></span>
+                          Save Field
+                        </button>
+                        <button class="btn btn-secondary" id="cqCancelBtn">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- About Section -->
+              <div class="settings-section" id="settings-about">
+                <div class="settings-section-header">
+                  <h2 class="settings-section-title">About</h2>
+                  <p class="settings-section-subtitle">Application information</p>
+                </div>
+                
+                <div class="settings-card">
+                  <div class="settings-card-body">
+                    <div style="display: flex; align-items: center; gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                      <div style="width: 56px; height: 56px; background: var(--primary); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--text-2xl); color: white;">W</div>
+                      <div>
+                        <h3 style="font-size: var(--text-xl); font-weight: 700;">WikiScout</h3>
+                        <p style="color: var(--text-muted);">Version 2.0.0</p>
+                      </div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--space-xl);">A powerful scouting platform for FRC and FTC teams. Built with care for the robotics community.</p>
+                    <div style="display: flex; gap: var(--space-md);">
+                      <a href="#" class="btn btn-secondary">
+                        <span data-icon="github" data-icon-size="16"></span>
+                        GitHub
+                      </a>
+                      <a href="#" class="btn btn-secondary">
+                        <span data-icon="mail" data-icon-size="16"></span>
+                        Support
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Logout -->
+              <div class="settings-logout">
+                <button class="btn btn-danger" id="settingsLogoutBtn" style="width: 100%;">
+                  <span data-icon="logout" data-icon-size="16"></span>
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Profile / Trading Card Page -->
+        <div class="screen" id="page-profile">
+          <div class="profile-layout">
+            <!-- Left: Robot Image & QR Upload -->
+            <div class="profile-image-section">
+              <div class="card profile-image-card">
+                <div class="card-header">
+                  <h3 class="card-title">Robot Image</h3>
+                  <span class="badge badge-secondary" id="profileImageStatus">No Image</span>
+                </div>
+                <div class="card-body">
+                  <div class="profile-image-preview" id="profileImagePreview">
+                    <div class="profile-image-placeholder">
+                      <span data-icon="robot" data-icon-size="64"></span>
+                      <p>No robot image uploaded</p>
+                    </div>
+                  </div>
+                  
+                  <div class="profile-image-actions">
+                    <button class="btn btn-primary" id="profileUploadBtn" style="width: 100%;">
+                      <span data-icon="camera" data-icon-size="16"></span>
+                      Upload Robot Photo
+                    </button>
+                    <p class="form-hint" style="text-align: center; margin-top: var(--space-sm);">
+                      Scan the QR code on your phone to take a photo
+                    </p>
+                  </div>
+                  
+                  <!-- QR Code Modal (hidden by default) -->
+                  <div class="profile-qr-section" id="profileQrSection" style="display: none;">
+                    <div class="profile-qr-code" id="profileQrCode"></div>
+                    <p class="profile-qr-instruction">Scan with your phone's camera to upload a photo</p>
+                    <div class="profile-qr-status" id="profileQrStatus">
+                      <span class="status-dot pending"></span>
+                      <span>Waiting for upload...</span>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" id="profileCancelQr">Cancel</button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Share Card -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Share Your Card</h3>
+                </div>
+                <div class="card-body">
+                  <div class="profile-share-section" id="profileShareSection">
+                    <div class="profile-share-url">
+                      <input type="text" class="form-input" id="profileShareUrl" readonly placeholder="Save profile to get share link">
+                      <button class="btn btn-ghost btn-icon" id="profileCopyUrl" title="Copy link">
+                        <span data-icon="copy" data-icon-size="16"></span>
+                      </button>
+                    </div>
+                    <div class="profile-share-qr" id="profileShareQr"></div>
+                    <p class="form-hint" style="text-align: center;">
+                      Others can scan this to view your trading card
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right: Profile Form + Card Preview -->
+            <div class="profile-form-section">
+              <form id="profileForm">
+                <!-- Robot Stats -->
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Robot Stats</h3>
+                    <span class="badge badge-primary">Performance</span>
+                  </div>
+                  <div class="card-body">
+                    <div class="profile-stats-grid">
+                      <div class="profile-stat-group">
+                        <h4 class="profile-stat-title">
+                          <span data-icon="clock" data-icon-size="16"></span>
+                          Autonomous
+                        </h4>
+                        <div class="form-row">
+                          <div class="form-group">
+                            <label class="form-label">Points (Low)</label>
+                            <input type="number" class="form-input" name="auto_points_low" id="autoPointsLow" min="0" max="100">
+                          </div>
+                          <div class="form-group">
+                            <label class="form-label">Points (High)</label>
+                            <input type="number" class="form-input" name="auto_points_high" id="autoPointsHigh" min="0" max="100">
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="profile-stat-group">
+                        <h4 class="profile-stat-title">
+                          <span data-icon="robot" data-icon-size="16"></span>
+                          Tele-Op
+                        </h4>
+                        <div class="form-row">
+                          <div class="form-group">
+                            <label class="form-label">Points (Low)</label>
+                            <input type="number" class="form-input" name="teleop_points_low" id="teleopPointsLow" min="0" max="200">
+                          </div>
+                          <div class="form-group">
+                            <label class="form-label">Points (High)</label>
+                            <input type="number" class="form-input" name="teleop_points_high" id="teleopPointsHigh" min="0" max="200">
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="profile-stat-group">
+                        <h4 class="profile-stat-title">
+                          <span data-icon="flag" data-icon-size="16"></span>
+                          Endgame
+                        </h4>
+                        <div class="form-group">
+                          <label class="form-label">Endgame Points</label>
+                          <input type="number" class="form-input" name="endgame_points" id="endgamePoints" min="0" max="50">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Capabilities -->
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Capabilities</h3>
+                    <span class="badge badge-success">Features</span>
+                  </div>
+                  <div class="card-body">
+                    <div class="profile-capabilities-grid">
+                      <label class="checkbox-card">
+                        <input type="checkbox" name="can_climb" id="canClimb">
+                        <div class="checkbox-card-content">
+                          <span class="checkbox-card-icon" data-icon="arrowUp" data-icon-size="24"></span>
+                          <span class="checkbox-card-label">Can Climb</span>
+                        </div>
+                      </label>
+                      
+                      <label class="checkbox-card">
+                        <input type="checkbox" name="can_shoot_near" id="canShootNear">
+                        <div class="checkbox-card-content">
+                          <span class="checkbox-card-icon" data-icon="target" data-icon-size="24"></span>
+                          <span class="checkbox-card-label">Shoot Near</span>
+                        </div>
+                      </label>
+                      
+                      <label class="checkbox-card">
+                        <input type="checkbox" name="can_shoot_far" id="canShootFar">
+                        <div class="checkbox-card-content">
+                          <span class="checkbox-card-icon" data-icon="zap" data-icon-size="24"></span>
+                          <span class="checkbox-card-label">Shoot Far</span>
+                        </div>
+                      </label>
+                      
+                      <label class="checkbox-card">
+                        <input type="checkbox" name="can_intake_ground" id="canIntakeGround">
+                        <div class="checkbox-card-content">
+                          <span class="checkbox-card-icon" data-icon="download" data-icon-size="24"></span>
+                          <span class="checkbox-card-label">Ground Intake</span>
+                        </div>
+                      </label>
+                      
+                      <label class="checkbox-card">
+                        <input type="checkbox" name="can_intake_source" id="canIntakeSource">
+                        <div class="checkbox-card-content">
+                          <span class="checkbox-card-icon" data-icon="inbox" data-icon-size="24"></span>
+                          <span class="checkbox-card-label">Source Intake</span>
+                        </div>
+                      </label>
+                    </div>
+                    
+                    <div class="form-row" style="margin-top: var(--space-lg);">
+                      <div class="form-group">
+                        <label class="form-label">Climb Level</label>
+                        <select class="form-input form-select" name="climb_level" id="climbLevel">
+                          <option value="">Not applicable</option>
+                          <option value="low">Low</option>
+                          <option value="mid">Mid</option>
+                          <option value="high">High</option>
+                          <option value="traversal">Traversal</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Drivetrain Type</label>
+                        <select class="form-input form-select" name="drivetrain_type" id="drivetrainType">
+                          <option value="">Select type...</option>
+                          <option value="tank">Tank Drive</option>
+                          <option value="mecanum">Mecanum</option>
+                          <option value="swerve">Swerve</option>
+                          <option value="holonomic">Holonomic</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Descriptions -->
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Descriptions</h3>
+                    <span class="badge badge-warning">Details</span>
+                  </div>
+                  <div class="card-body">
+                    <div class="form-group">
+                      <label class="form-label">Robot Description</label>
+                      <textarea class="form-input form-textarea" name="robot_description" id="robotDescription" rows="3" placeholder="Describe your robot's design, mechanisms, and key features..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="form-label">Autonomous Description</label>
+                      <textarea class="form-input form-textarea" name="auto_description" id="autoDescription" rows="3" placeholder="Describe your autonomous routines, starting positions, and scoring patterns..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="form-label">Strategy Notes</label>
+                      <textarea class="form-input form-textarea" name="strategy_notes" id="strategyNotes" rows="3" placeholder="Share your preferred strategies, alliance coordination tips..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="form-label">Custom Notes (Private)</label>
+                      <textarea class="form-input form-textarea" name="custom_notes" id="customNotes" rows="2" placeholder="Private notes that won't appear on your public card..."></textarea>
+                      <div class="form-hint">These notes are only visible to you</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Visibility Settings -->
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Visibility</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <h4>Public Profile</h4>
+                        <p>Allow others to view your trading card</p>
+                      </div>
+                      <label class="toggle">
+                        <input type="checkbox" name="is_public" id="isPublic" checked>
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Save Button -->
+                <div class="profile-form-actions">
+                  <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                    <span data-icon="check" data-icon-size="18"></span>
+                    Save Profile
+                  </button>
+                </div>
+              </form>
+              
+              <!-- Live Trading Card Preview -->
+              <div class="profile-card-preview-wrapper">
+                <div class="profile-card-preview" id="cardPreview">
+                  <div class="profile-card-header">
+                    <div class="profile-card-rank">★ Rank —</div>
+                    <div class="profile-card-team">—</div>
+                    <div class="profile-card-event">Fill in the form to see your card</div>
+                  </div>
+                  <div class="profile-card-image">
+                    <div class="profile-card-image-placeholder">
+                      <span data-icon="camera" data-icon-size="32"></span>
+                      <span>Robot Image</span>
+                    </div>
+                  </div>
+                  <div class="profile-card-stats">
+                    <div class="profile-card-stat">
+                      <div class="profile-card-stat-label">Auto (Low)</div>
+                      <div class="profile-card-stat-value">—</div>
+                    </div>
+                    <div class="profile-card-stat">
+                      <div class="profile-card-stat-label">Auto (High)</div>
+                      <div class="profile-card-stat-value">—</div>
+                    </div>
+                    <div class="profile-card-stat">
+                      <div class="profile-card-stat-label">Teleop (Low)</div>
+                      <div class="profile-card-stat-value">—</div>
+                    </div>
+                    <div class="profile-card-stat">
+                      <div class="profile-card-stat-label">Teleop (High)</div>
+                      <div class="profile-card-stat-value">—</div>
+                    </div>
+                    <div class="profile-card-stat">
+                      <div class="profile-card-stat-label">Endgame</div>
+                      <div class="profile-card-stat-value">—</div>
+                    </div>
+                    <div class="profile-card-stat">
+                      <div class="profile-card-stat-label">Drivetrain</div>
+                      <div class="profile-card-stat-value">—</div>
+                    </div>
+                  </div>
+                  <div class="profile-card-description" style="opacity: 0.5;">No description yet...</div>
+                </div>
+                <div class="profile-card-label">Live Preview</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Team Assignment Modal -->
+  <div class="modal-overlay" id="assignTeamsModal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Assign Teams to <span id="assignModalMemberName">Member</span></h3>
+        <button class="btn btn-ghost btn-icon btn-sm" onclick="app.closeAssignTeamsModal()">
+          <span data-icon="x" data-icon-size="18"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="assign-search">
+          <div class="search-input">
+            <span class="search-input-icon" data-icon="search" data-icon-size="16"></span>
+            <input type="text" placeholder="Search teams..." id="assignTeamSearch" oninput="app.filterAssignTeams(this.value)">
+          </div>
+        </div>
+        <div class="assign-info">
+          <span class="badge badge-secondary" id="assignTeamCount">0 teams</span>
+          <span class="assign-legend">
+            <span class="assign-legend-item"><span class="assign-dot assigned-self"></span> Assigned to this member</span>
+            <span class="assign-legend-item"><span class="assign-dot assigned-other"></span> Assigned to another member</span>
+          </span>
+        </div>
+        <div class="assign-teams-list" id="assignTeamsList">
+          <!-- Teams will be rendered here -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="app.closeAssignTeamsModal()">Cancel</button>
+        <button class="btn btn-primary" id="assignTeamsSaveBtn" onclick="app.saveAssignedTeams()">
+          <span data-icon="check" data-icon-size="16"></span>
+          Save Assignments
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Event Picker Modal -->
+  <div class="modal-overlay" id="eventPickerModal" style="display: none;">
+    <div class="modal-dialog event-picker-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Select Event</h3>
+        <div class="modal-header-actions">
+          <select class="form-input form-select" id="epSeasonSelect" style="display: none; width: 120px; padding: 4px 8px; font-size: 13px;">
+            <!-- Seasons will be populated by JS -->
+          </select>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="app.closeEventPicker()">
+            <span data-icon="x" data-icon-size="18"></span>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 0;">
+        <!-- Search Bar -->
+        <div class="ep-search">
+          <div class="search-input">
+            <span class="search-input-icon" data-icon="search" data-icon-size="16"></span>
+            <input type="text" placeholder="Search by name, code, city, state..." id="epSearchInput" autocomplete="off">
+          </div>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="ep-tabs">
+          <button class="ep-tab active" data-ep-filter="today">
+            <span data-icon="clock" data-icon-size="14"></span>
+            Today
+          </button>
+          <button class="ep-tab" data-ep-filter="my-team">
+            <span data-icon="teams" data-icon-size="14"></span>
+            My Team
+          </button>
+          <button class="ep-tab" data-ep-filter="all">
+            <span data-icon="globe" data-icon-size="14"></span>
+            All Events
+          </button>
+        </div>
+        
+        <!-- Event List -->
+        <div class="ep-list" id="epEventList">
+          <div class="ep-loading">
+            <div class="mobile-loading-spinner" style="width: 24px; height: 24px;"></div>
+            <span>Loading events...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <!-- Scripts -->
+  <script>var WIKISCOUT_BUILD = '1771097114';</script>
+  <script src="js/icons.js?v=1771097114"></script>
+  <script src="js/utils.js?v=1771097114"></script>
+  <script src="js/api.js?v=1771097114"></script>
+  <script src="js/version-check.js?v=1771097114"></script>
+  <script src="js/dashboard-app.js?v=1771097114"></script>
+</body>
+</html>

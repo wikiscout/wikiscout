@@ -2,61 +2,450 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>WikiScout</title>
-  <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'><link rel="stylesheet" href="./style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WikiScout - FRC/FTC Scouting Platform</title>
+  <link rel="stylesheet" href="css/variables.css?v=1771097114">
+  <link rel="stylesheet" href="css/base.css?v=1771097114">
+  <link rel="stylesheet" href="css/components.css?v=1771097114">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2300d26a'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-weight='bold'>W</text></svg>">
+  <style>
+    .login-layout {
+      min-height: 100vh;
+      display: flex;
+      background: var(--bg-primary);
+    }
+    
+    .login-hero {
+      flex: 1;
+      display: none;
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @media (min-width: 1024px) {
+      .login-hero {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+    
+    .login-hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: var(--space-3xl);
+    }
+    
+    .login-hero-logo {
+      font-size: 5rem;
+      margin-bottom: var(--space-4xl);
+    }
+    
+    .login-hero-title {
+      font-size: var(--text-4xl);
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: var(--space-md);
+    }
+    
+    .login-hero-subtitle {
+      font-size: var(--text-lg);
+      color: var(--text-secondary);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    .login-hero-bg {
+      position: absolute;
+      inset: 0;
+      opacity: 0.1;
+      background: 
+        radial-gradient(circle at 20% 80%, var(--primary) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, var(--secondary) 0%, transparent 50%);
+    }
+    
+    .login-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl);
+    }
+    
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .login-logo-mobile {
+      font-size: 3rem;
+      margin-bottom: var(--space-4xl);
+    }
+    
+    @media (min-width: 1024px) {
+      .login-logo-mobile {
+        display: none;
+      }
+    }
+    
+    .login-title {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .login-subtitle {
+      color: var(--text-muted);
+    }
+    
+    .login-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-2xl);
+    }
+    
+    .login-card .form-input {
+      border-width: 2px;
+      padding: 12px 16px;
+    }
+    
+    .login-tabs {
+      display: flex;
+      gap: var(--space-md);
+      margin-bottom: var(--space-2xl);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-sm);
+    }
+    
+    .login-tab {
+      flex: 1;
+      padding: var(--space-md) var(--space-lg);
+      font-weight: 600;
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      background: transparent;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+      text-align: center;
+    }
+    
+    .login-tab:hover {
+      color: var(--text-primary);
+      border-color: var(--border-light);
+    }
+    
+    .login-tab.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .login-form {
+      display: none;
+    }
+    
+    .login-form.active {
+      display: block;
+      animation: fadeIn var(--transition-base) ease-out;
+    }
+    
+    .login-form .form-group {
+      margin-bottom: var(--space-xl);
+    }
+    
+    .login-form .form-group:last-of-type {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .form-error {
+      display: none;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: var(--space-md);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-lg);
+      font-size: var(--text-sm);
+    }
+    
+    .form-error.show {
+      display: block;
+    }
+    
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin: var(--space-xl) 0;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+    
+    .login-divider::before,
+    .login-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    
+    .login-otp-link {
+      display: block;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      padding: var(--space-md);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      transition: all var(--transition-fast);
+    }
+    
+    .login-otp-link:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .login-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: var(--space-md);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-lg);
+      font-size: var(--text-sm);
+      display: none;
+    }
+    
+    .login-error.show {
+      display: block;
+      animation: slideDown var(--transition-base) ease-out;
+    }
+  </style>
+  <script src="js/api.js?v=1771097114"></script>
 </head>
 <body>
-<body class="text-center">
-  <div id="page">
-    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
-      <header class="masthead mb-auto">
-        <div class="inner">
-          <nav class="nav nav-masthead justify-content-center">
-            <a class="nav-link" href="https://cliq.page/wikiscout" target="_blank">Learn More</a>
-            <a class="nav-link" href="https://github.com/caelen-cater/WikiScout/" target="_blank">View on Github</a>
-            <a class="nav-link" href="#">|</a>
-            <a class="nav-link" id="auth-link" href="#">Login</a>
-          </nav>
-        </div>
-      </header>
-
-      <main role="main" class="inner cover">
-        <h1 class="cover-heading">Scouting at its peak</h1>
-        <p class="lead">Scout efficiently with WikiScout</p>
-        <p class="lead">
-          <a href="#" id="trigger" class="btn btn-lg btn-secondary">Trigger</a>
+  <div class="login-layout">
+    <!-- Hero Section (Desktop) -->
+    <div class="login-hero">
+      <div class="login-hero-bg"></div>
+      <div class="login-hero-content">
+        <div class="login-hero-logo" style="width: 80px; height: 80px; background: var(--primary); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 2rem; font-weight: 800; color: #000;">W</div>
+        <h1 class="login-hero-title">WikiScout</h1>
+        <p class="login-hero-subtitle">
+          The ultimate scouting platform for FIRST Robotics teams. Track, analyze, and win.
         </p>
-      </main>
-
-      <footer class="mastfoot mt-auto">
-        <div class="inner">
-          <p></p>
-        </div>
-      </footer>
+      </div>
     </div>
+    
+    <!-- Login Form -->
+    <main class="login-main">
+      <div class="login-container">
+        <div class="login-header">
+          <div class="login-logo-mobile" style="width: 64px; height: 64px; background: var(--primary); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 1.5rem; font-weight: 800; color: #000;">W</div>
+          <h1 class="login-title">Welcome to WikiScout</h1>
+          <p class="login-subtitle">Sign in to your team account</p>
+        </div>
+        
+        <div class="login-card">
+          <div class="login-error" id="loginError">
+            Invalid email or password. Please try again.
+          </div>
+          
+          <div class="login-tabs">
+            <button class="login-tab active" data-tab="login">Sign In</button>
+            <button class="login-tab" data-tab="register">Register</button>
+          </div>
+          
+          <!-- Login Form -->
+          <form class="login-form active" id="loginForm">
+            <div id="loginError" class="form-error"></div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" name="email" id="loginEmail" placeholder="team@example.com" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-input" name="password" id="loginPassword" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg" id="loginBtn" style="width: 100%;">
+              Sign In
+            </button>
+          </form>
+          
+          <!-- Register Form -->
+          <form class="login-form" id="registerForm">
+            <div id="registerError" class="form-error"></div>
+            <div class="form-group">
+              <label class="form-label">Team Number</label>
+              <input type="text" class="form-input" name="team" id="registerTeam" placeholder="1234" pattern="[0-9]+" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-input" name="first" id="registerFirst" placeholder="John" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-input" name="last" id="registerLast" placeholder="Doe" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" name="email" id="registerEmail" placeholder="team@example.com" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-input" name="password" id="registerPassword" placeholder="••••••••" minlength="8" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <input type="password" class="form-input" name="confirmPassword" id="registerConfirmPassword" placeholder="••••••••" minlength="8" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg" id="registerBtn" style="width: 100%;">
+              Create Account
+            </button>
+          </form>
+          
+          <div class="login-divider">or</div>
+          
+          <a href="code.html" class="login-otp-link">
+            Sign in with OTP Code
+          </a>
+        </div>
+      </div>
+    </main>
   </div>
-
-  <canvas id="reveal-effect"></canvas>
-</body>
-<!-- partial -->
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/100/three.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TweenMax.min.js'></script><script  src="./script.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const authLink = document.getElementById('auth-link');
-    const triggerButton = document.getElementById('trigger');
-    if (document.cookie.split(';').some((item) => item.trim().startsWith('auth='))) {
-      authLink.textContent = 'Dashboard';
-      authLink.href = './dashboard';
-      triggerButton.textContent = 'Dashboard';
-      triggerButton.href = './dashboard';
-    } else {
-      authLink.textContent = 'Login';
-      authLink.href = './login';
-      triggerButton.textContent = 'Get Started';
-      triggerButton.href = './login';
+  
+  <script>
+    // Tab switching
+    document.querySelectorAll('.login-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab + 'Form').classList.add('active');
+      });
+    });
+    
+    // Check for error in URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth') === 'failed') {
+      document.getElementById('loginError').classList.add('show');
+      document.getElementById('loginError').textContent = 'Invalid email or password. Please try again.';
+    } else if (params.get('auth') === 'exists') {
+      document.getElementById('loginError').classList.add('show');
+      document.getElementById('loginError').textContent = 'An account with this email already exists.';
+      document.querySelector('[data-tab="login"]').click();
     }
-  });
-</script>
+    
+    // Force desktop mode check
+    const forceDesktop = localStorage.getItem('forceDesktop') === 'true';
+    const isMobile = window.matchMedia('(max-width: 768px)').matches && !forceDesktop;
+    
+    function redirectToDashboard() {
+      window.location.href = isMobile ? 'mobile.html' : 'dashboard.html';
+    }
+    
+    // Check if already logged in and redirect (only if api.js is loaded)
+    if (typeof api !== 'undefined') {
+      api.validateToken()
+        .then(result => {
+          if (result && result.team_number) {
+            redirectToDashboard();
+          }
+        })
+        .catch(() => {
+          // Not logged in, stay on login page
+        });
+      
+      // Handle login form
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+        const errorEl = document.getElementById('loginError');
+        
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+        errorEl.classList.remove('show');
+        
+        try {
+          const result = await api.login(email, password);
+          if (result && result.success) {
+            redirectToDashboard();
+          } else {
+            throw new Error(result?.error || 'Login failed');
+          }
+        } catch (err) {
+          errorEl.textContent = err.message || 'Invalid email or password';
+          errorEl.classList.add('show');
+          btn.disabled = false;
+          btn.textContent = 'Sign In';
+        }
+      });
+      
+      // Handle register form
+      document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const teamNumber = document.getElementById('registerTeam').value;
+        const firstName = document.getElementById('registerFirst').value;
+        const lastName = document.getElementById('registerLast').value;
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+        const btn = document.getElementById('registerBtn');
+        const errorEl = document.getElementById('registerError');
+        
+        errorEl.classList.remove('show');
+        
+        // Validate passwords match
+        if (password !== confirmPassword) {
+          errorEl.textContent = 'Passwords do not match';
+          errorEl.classList.add('show');
+          return;
+        }
+        
+        btn.disabled = true;
+        btn.textContent = 'Creating account...';
+        
+        try {
+          const result = await api.register(email, password, firstName, lastName, teamNumber);
+          if (result && result.success) {
+            redirectToDashboard();
+          } else {
+            throw new Error(result?.error || 'Registration failed');
+          }
+        } catch (err) {
+          errorEl.textContent = err.message || 'Failed to create account';
+          errorEl.classList.add('show');
+          btn.disabled = false;
+          btn.textContent = 'Create Account';
+        }
+      });
+    }
+  </script>
 </body>
 </html>

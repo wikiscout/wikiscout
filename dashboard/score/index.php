@@ -1,4 +1,6 @@
 <?php
-header('Content-Type: application/json');
-echo '{"score":"N/A"}';
+require_once __DIR__ . '/../../helpers.php';
+bootstrap();
+
+jsonResponse(['score' => 'N/A']);
 ?>

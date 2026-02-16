@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | WikiScout</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2300d26a'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-weight='bold'>W</text></svg>">
+  <style>
+    .otp-layout {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl);
+      background: var(--bg-primary);
+    }
+    
+    .otp-container {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .otp-logo {
+      width: 64px;
+      height: 64px;
+      background: var(--primary);
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-lg);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #000;
+    }
+    
+    .otp-title {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .otp-subtitle {
+      color: var(--text-muted);
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .otp-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-xl);
+    }
+    
+    .otp-inputs {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+      margin-bottom: var(--space-xl);
+    }
+    
+    .otp-input {
+      width: 48px;
+      height: 56px;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      font-family: var(--font-mono);
+      text-align: center;
+      color: var(--text-primary);
+      transition: all var(--transition-fast);
+    }
+    
+    .otp-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    
+    .otp-input.filled {
+      border-color: var(--primary);
+      background: var(--primary-glow);
+    }
+    
+    .otp-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: var(--space-md);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-lg);
+      font-size: var(--text-sm);
+      display: none;
+    }
+    
+    .otp-error.show {
+      display: block;
+    }
+    
+    .otp-back {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-top: var(--space-xl);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+    }
+    
+    .otp-back:hover {
+      color: var(--text-primary);
+    }
+    
+    .otp-loading {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      color: var(--text-muted);
+      padding: var(--space-md);
+    }
+    
+    .otp-loading.show {
+      display: flex;
+    }
+    
+    .otp-loading svg {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Token login state */
+    .token-login-state {
+      display: none;
+      padding: var(--space-2xl);
+    }
+    
+    .token-login-state.show {
+      display: block;
+    }
+    
+    .token-login-spinner {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto var(--space-xl);
+      border: 3px solid var(--border-color);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    .token-login-title {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .token-login-text {
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+  </style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+  <div class="otp-layout">
+    <div class="otp-container">
+      <div class="otp-logo">W</div>
+      
+      <!-- Token Login State (auto-login via QR code) -->
+      <div class="token-login-state" id="tokenLoginState">
+        <div class="otp-card">
+          <div class="token-login-spinner"></div>
+          <div class="token-login-title" id="tokenTitle">Signing you in...</div>
+          <div class="token-login-text" id="tokenText">Validating your credentials</div>
+        </div>
+      </div>
+      
+      <!-- OTP Login State -->
+      <div id="otpLoginState">
+        <h1 class="otp-title">Enter Access Code</h1>
+        <p class="otp-subtitle">Enter the 6-digit code from your team lead</p>
+      
+      <div class="otp-card">
+        <div class="otp-error" id="otpError">
+          Invalid or expired code. Please try again.
+        </div>
+        
+          <form id="otpForm">
+          <div class="otp-inputs" id="otpInputs">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required>
+          </div>
+          
+          <div class="otp-loading" id="otpLoading">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+            Verifying code...
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" style="width: 100%;">
+            Sign In
+          </button>
+        </form>
+        </div>
+      </div>
+      
+      <a href="index.html" class="otp-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back to login
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const tokenParam = params.get('token');
+    
+    function redirectToDashboard() {
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        window.location.href = 'mobile.html';
+      } else {
+        window.location.href = 'dashboard.html';
+      }
+    }
+    
+    // If we have a token param, auto-login
+    if (tokenParam) {
+      document.getElementById('otpLoginState').style.display = 'none';
+      document.getElementById('tokenLoginState').classList.add('show');
+      
+      (async () => {
+        try {
+          console.log('Attempting sub-account token login...');
+          const result = await api.loginWithSubAccountToken(tokenParam);
+          console.log('Login result:', result);
+          if (result && result.success) {
+            document.getElementById('tokenTitle').textContent = 'Welcome, ' + (result.name || 'Team Member') + '!';
+            document.getElementById('tokenText').textContent = 'Redirecting to dashboard...';
+            setTimeout(redirectToDashboard, 800);
+          } else {
+            throw new Error(result?.error || 'Login failed - unexpected response');
+          }
+        } catch (err) {
+          console.error('Token login failed:', err);
+          document.getElementById('tokenTitle').textContent = 'Login Failed';
+          // Show the actual server error message for better debugging
+          const msg = err.message || 'Unknown error';
+          if (msg === 'Unauthorized') {
+            document.getElementById('tokenText').textContent = 'Invalid or expired link. Ask your team lead for a new QR code.';
+          } else {
+            document.getElementById('tokenText').textContent = msg;
+          }
+          document.querySelector('.token-login-spinner').style.display = 'none';
+        }
+      })();
+    } else {
+      // OTP login flow
+    const inputs = document.querySelectorAll('.otp-input');
+    const form = document.getElementById('otpForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loading = document.getElementById('otpLoading');
+      const errorEl = document.getElementById('otpError');
+    
+    // Handle input navigation
+    inputs.forEach((input, index) => {
+      input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        
+        if (!/^\d*$/.test(value)) {
+          e.target.value = '';
+          return;
+        }
+        
+        input.classList.toggle('filled', value.length > 0);
+        
+        if (value.length === 1 && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+        
+          // Auto-submit if all 6 filled
+        if (Array.from(inputs).every(i => i.value.length === 1)) {
+            setTimeout(() => form.dispatchEvent(new Event('submit')), 100);
+        }
+      });
+      
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && index > 0) {
+          inputs[index - 1].focus();
+        }
+      });
+      
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const paste = e.clipboardData.getData('text').replace(/\D/g, '');
+        
+          if (paste.length >= 6) {
+          inputs.forEach((inp, i) => {
+            inp.value = paste[i] || '';
+            inp.classList.toggle('filled', inp.value.length > 0);
+          });
+            inputs[Math.min(paste.length, inputs.length) - 1].focus();
+          
+            setTimeout(() => form.dispatchEvent(new Event('submit')), 100);
+        }
+      });
+    });
+    
+    inputs[0].focus();
+    
+      // Handle form submission - try both login methods
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const code = Array.from(inputs).map(i => i.value).join('');
+        if (code.length !== 6) {
+          errorEl.textContent = 'Please enter all 6 digits';
+          errorEl.classList.add('show');
+        return;
+      }
+      
+      submitBtn.style.display = 'none';
+      loading.classList.add('show');
+        errorEl.classList.remove('show');
+      
+      try {
+          // Try sub-account OTP login first
+          const subResult = await api.loginWithSubAccountOtp(code);
+          if (subResult && subResult.success) {
+            redirectToDashboard();
+            return;
+          }
+        } catch (err) {
+          // Sub-account OTP failed, try main account OTP
+          console.log('Sub-account OTP failed, trying main account OTP...');
+        }
+        
+        try {
+          // Try main account OTP
+          const mainResult = await api.authenticateWithOtp(code);
+          if (mainResult && mainResult.success) {
+            redirectToDashboard();
+            return;
+          }
+          throw new Error('Invalid code');
+      } catch (err) {
+          errorEl.textContent = 'Invalid or expired code. Please try again.';
+          errorEl.classList.add('show');
+        submitBtn.style.display = 'block';
+        loading.classList.remove('show');
+        
+        inputs.forEach(i => {
+          i.value = '';
+          i.classList.remove('filled');
+        });
+        inputs[0].focus();
+      }
+    });
+    }
+  </script>
+</body>
+</html>

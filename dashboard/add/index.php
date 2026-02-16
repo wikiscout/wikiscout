@@ -1,248 +1,84 @@
 <?php
-require_once '../../config.php';
-
-$server = $servers[array_rand($servers)];
-
-try {
-    $db = new PDO(
-        "mysql:host={$mysql['host']};dbname={$mysql['database']};port={$mysql['port']}",
-        $mysql['username'],
-        $mysql['password'],
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
-    
-    // Create scouting_data table if not exists
-    $db->exec("CREATE TABLE IF NOT EXISTS scouting_data (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        team_number VARCHAR(50) NOT NULL,
-        event_code VARCHAR(50) NOT NULL,
-        season_year INT NOT NULL,
-        scouting_team VARCHAR(50) NOT NULL,
-        data TEXT NOT NULL,
-        is_private BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_team_event (team_number, event_code)
-    )");
-
-} catch (PDOException $e) {
-    error_log("Connection failed: " . $e->getMessage());
-    http_response_code(500);
-    echo json_encode(['error' => 'Database error']);
-    exit;
-}
-
-header('Content-Type: application/json');
-header('Cache-Control: no-cache, no-store, must-revalidate');
-header('Pragma: no-cache');
-header('Expires: 0');
-
-function logError($message, $code, $trace, $userId, $severity, $metadata) {
-    global $server, $apikey, $webhook;
-
-    // Remove backslashes from webhook URL
-    $cleanWebhook = str_replace('\\', '', $webhook);
-
-    $errorData = [
-        'message' => $message,
-        'code' => $code,
-        'trace' => $trace,
-        'user_id' => $userId,
-        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-        'agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-        'device_info' => php_uname(),
-        'server' => $_SERVER['SERVER_NAME'] ?? 'unknown',
-        'request_url' => $_SERVER['REQUEST_URI'] ?? 'unknown',
-        'request_method' => $_SERVER['REQUEST_METHOD'] ?? 'unknown',
-        'request_headers' => json_encode(getallheaders()),
-        'request_parameters' => json_encode($_GET),
-        'request_body' => file_get_contents('php://input'),
-        'metadata' => json_encode($metadata),
-        'severity' => $severity,
-        'webhook_url' => addslashes($cleanWebhook),
-        'webhook_content' => "An error (:error_id) occurred with :trace by user :user_id with error ':message' and code :code at :timestamp"
-    ];
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://$server/v2/data/error/");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $apikey"]);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($errorData));
-
-    curl_exec($ch);
-    curl_close($ch);
-}
+require_once __DIR__ . '/../../helpers.php';
+bootstrap();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    logError('Method Not Allowed', 405, __FILE__ . ':' . __LINE__, null, 'medium', []);
-    echo json_encode(['error' => 'Method Not Allowed']);
-    exit;
-}
-
-$teamNumber = $_POST['team_number'] ?? null;
-$eventId = $_POST['event_id'] ?? null;
-$data = $_POST['data'] ?? null;
-
-if (!$teamNumber || !$eventId || !$data) {
-    http_response_code(400);
-    logError('Missing parameters', 400, __FILE__ . ':' . __LINE__, null, 'medium', compact('teamNumber', 'eventId', 'data'));
-    echo json_encode(['error' => 'Missing parameters']);
-    exit;
-}
-
-// Remove new lines from input data
-$teamNumber = str_replace(["\r", "\n"], '', $teamNumber);
-$eventId = str_replace(["\r", "\n"], '', $eventId);
-$data = str_replace(["\r", "\n"], '', $data);
-
-$token = $_COOKIE['auth'] ?? null;
-if (!$token) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
+    errorResponse('Method Not Allowed', 405);
 }
 
 try {
-    $db = new PDO(
-        "mysql:host={$mysql['host']};dbname={$mysql['database']};port={$mysql['port']}",
-        $mysql['username'],
-        $mysql['password'],
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    $user = requireTeam();
+    $db = getDb();
 
-    // Validate token
-    $stmt = $db->prepare("
-        SELECT u.id, u.team_number 
-        FROM auth_tokens at
-        JOIN users u ON at.user_id = u.id
-        WHERE at.token = ?
-        AND at.created_at <= CURRENT_TIMESTAMP
-        AND at.expires_at >= CURRENT_TIMESTAMP
-        AND at.is_revoked = 0
-    ");
-    
-    $stmt->execute([$token]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $teamNumber = isset($_POST['team_number']) ? preg_replace('/[\r\n]/', '', $_POST['team_number']) : null;
+    $eventId = isset($_POST['event_id']) ? preg_replace('/[\r\n]/', '', $_POST['event_id']) : null;
+    $data = isset($_POST['data']) ? preg_replace('/[\r\n]/', '', $_POST['data']) : null;
 
-    if (!$user) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Invalid or expired token']);
-        exit;
+    if (!$teamNumber || !$eventId || !$data) {
+        errorResponse('Missing parameters', 400);
     }
 
-    if ($user['team_number'] === null) {
-        http_response_code(501);
-        echo json_encode(['error' => 'No team number assigned']);
-        exit;
+    // DEVDATA0 is read-only — block all saves
+    if (isDevDataReadOnly($eventId)) {
+        errorResponse('Demo event DEVDATA0 is read-only', 403);
     }
 
-    $userId = $user['id'];
-    $scoutingTeamNumber = $user['team_number'];
-
-    // Read form configuration from JSON
-    $formConfigPath = '../../form.json';
-    $formFields = [];
-    $privateFieldIndexes = [];
-
-    if (file_exists($formConfigPath)) {
-        $formConfig = json_decode(file_get_contents($formConfigPath), true);
-        if (is_array($formConfig)) {
-            $fieldIndex = 0;
-            foreach ($formConfig as $field) {
-                // Skip separators and headers - they don't have data
-                if (isset($field['type']) && ($field['type'] === 'separator' || $field['type'] === 'header')) {
-                    continue;
-                }
-                
-                if (isset($field['private']) && $field['private']) {
-                    $privateFieldIndexes[] = $fieldIndex;
-                }
-                $formFields[] = $field['label'] ?? '';
-                $fieldIndex++;
-            }
-        }
-    } else {
-        error_log('Form configuration file not found: ' . $formConfigPath);
+    // Block writes to events that have ended
+    if (isEventEnded($eventId)) {
+        errorResponse('This event has ended — scouting data is read-only', 403);
     }
+
+    $formConfig = getDefaultFormConfig();
+    $privateFieldIndexes = getPrivateFieldIndexes($formConfig);
 
     // Parse JSON data
     $dataFields = json_decode($data, true);
-    
+
     // Handle backward compatibility: if JSON decode fails, try pipe-separated format
-    if ($dataFields === null && json_last_error() !== JSON_ERROR_NONE) {
-        // Legacy format: pipe-separated
+    if ($dataFields === null || !is_array($dataFields)) {
         $dataFields = explode('|', $data);
-        if (strpos($dataFields[0], $eventId) !== false) {
+        if (isset($dataFields[0]) && strpos($dataFields[0], $eventId) !== false) {
             array_shift($dataFields);
         }
     }
-    
-    // Ensure we have an array
-    if (!is_array($dataFields)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid data format']);
-        exit;
-    }
-    
+
     $publicData = $dataFields;
 
     // Replace private fields with placeholder
     foreach ($privateFieldIndexes as $index) {
         if (isset($publicData[$index])) {
-            $publicData[$index] = "Redacted Field";
+            $publicData[$index] = 'Redacted Field';
         }
     }
 
-    $currentMonth = (int)date('n'); // 1-12
-    $currentYear = (int)date('Y');
-    $seasonYear = ($currentMonth >= 9) ? $currentYear : $currentYear - 1;
+    $seasonYear = getSeasonYear();
 
-    $eventCode = $eventId;
+    // Upsert: delete existing data from this scouting team for this team/event, then insert fresh
+    $stmt = $db->prepare("
+        DELETE FROM scouting_data
+        WHERE team_number = ? AND event_code = ? AND season_year = ? AND scouting_team = ?
+    ");
+    $stmt->execute([$teamNumber, $eventId, $seasonYear, $user['team_number']]);
 
-    try {
-        // Save both public and private data
-        $stmt = $db->prepare("
-            INSERT INTO scouting_data 
-            (team_number, event_code, season_year, scouting_team, data, is_private) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
+    // Save both public and private data
+    $stmt = $db->prepare("
+        INSERT INTO scouting_data 
+        (team_number, event_code, season_year, scouting_team, data, is_private)
+        VALUES (?, ?, ?, ?, ?, 0)
+    ");
+    $stmt->execute([$teamNumber, $eventId, $seasonYear, $user['team_number'], json_encode($publicData)]);
 
-        // Save public data as JSON
-        $stmt->execute([
-            $teamNumber,
-            $eventCode,
-            $seasonYear,
-            $scoutingTeamNumber,
-            json_encode($publicData),
-            0  // is_private = false
-        ]);
+    $stmt = $db->prepare("
+        INSERT INTO scouting_data 
+        (team_number, event_code, season_year, scouting_team, data, is_private)
+        VALUES (?, ?, ?, ?, ?, 1)
+    ");
+    $stmt->execute([$teamNumber, $eventId, $seasonYear, $user['team_number'], json_encode($dataFields)]);
 
-        // Save private data as JSON
-        $stmt->execute([
-            $teamNumber,
-            $eventCode,
-            $seasonYear,
-            $scoutingTeamNumber,
-            json_encode($dataFields),
-            1  // is_private = true
-        ]);
+    jsonResponse(['success' => true]);
 
-        http_response_code(200);
-        echo json_encode(['success' => true]);
-
-    } catch (Exception $e) {
-        http_response_code(500);
-        logError('Database operation failed', 500, __FILE__ . ':' . __LINE__, $userId, 'urgent', [
-            'error' => $e->getMessage()
-        ]);
-        echo json_encode(['error' => 'Database operation failed']);
-    }
-
-} catch (PDOException $e) {
-    error_log("Connection failed: " . $e->getMessage());
-    http_response_code(500);
-    echo json_encode(['error' => 'Database error']);
-    exit;
+} catch (Exception $e) {
+    error_log("Add scouting data error: " . $e->getMessage());
+    errorResponse('Database operation failed', 500);
 }
 ?>

@@ -1,33 +1,28 @@
 <?php
-require_once '../../config.php';
+require_once __DIR__ . '/../../helpers.php';
+bootstrap();
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (isset($_COOKIE['auth'])) {
-        try {
-            $db = new PDO(
-                "mysql:host={$mysql['host']};dbname={$mysql['database']};port={$mysql['port']}",
-                $mysql['username'],
-                $mysql['password'],
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-            );
-            
-            // Update token to be revoked instead of deleting
-            $stmt = $db->prepare("
-                UPDATE auth_tokens 
-                SET is_revoked = 1 
-                WHERE token = ?
-            ");
-            $stmt->execute([$_COOKIE['auth']]);
-            
-            // Clear the cookie
-            setcookie('auth', '', time() - 3600, '/');
-            
-        } catch (PDOException $e) {
-            error_log("Logout error: " . $e->getMessage());
-        }
+$token = getAuthCookie();
+
+if ($token) {
+    try {
+        $db = getDb();
+        // Works for both main and sub account tokens
+        $stmt = $db->prepare("UPDATE auth_tokens SET is_revoked = 1 WHERE token = ?");
+        $stmt->execute([$token]);
+    } catch (Exception $e) {
+        error_log("Logout error: " . $e->getMessage());
     }
 }
 
+$isApi = isApiRequest();
+
+if ($isApi) {
+    clearAuthCookie();
+    jsonResponse(['success' => true]);
+}
+
+clearAuthCookie();
 header('Location: ../');
 exit();
 ?>

@@ -1,54 +1,70 @@
 <?php
-require_once '../../../config.php';
+require_once __DIR__ . '/../../../helpers.php';
+bootstrap();
 
-if (!isset($_COOKIE['auth'])) {
+$token = getAuthCookie();
+if (!$token) {
     http_response_code(401);
     exit;
 }
 
-try {
-    $db = new PDO(
-        "mysql:host={$mysql['host']};dbname={$mysql['database']};port={$mysql['port']}",
-        $mysql['username'],
-        $mysql['password'],
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+$db = getDb();
 
-    // Check token validity
-    $stmt = $db->prepare("
-        SELECT u.id, u.team_number
-        FROM auth_tokens at
-        JOIN users u ON at.user_id = u.id
-        WHERE at.token = ?
-        AND at.expires_at > CURRENT_TIMESTAMP
-        AND at.is_revoked = 0
-    ");
-    
-    $stmt->execute([$_COOKIE['auth']]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    // Invalid or expired token
-    if (!$result) {
-        http_response_code(401);
-        exit;
-    }
+// Try main account first
+$stmt = $db->prepare("
+    SELECT u.id, u.team_number, u.first_name, u.last_name
+    FROM auth_tokens at
+    JOIN users u ON at.user_id = u.id
+    WHERE at.token = ?
+    AND at.user_id IS NOT NULL
+    AND at.expires_at > CURRENT_TIMESTAMP
+    AND at.is_revoked = 0
+");
+$stmt->execute([$token]);
+$main = $stmt->fetch();
 
-    // Valid token but no team number assigned
-    if ($result['team_number'] === null) {
+if ($main) {
+    if ($main['team_number'] === null) {
         http_response_code(501);
         exit;
     }
-
-    // Token is valid and has team number
-    header('Content-Type: application/json');
-    echo json_encode([
+    jsonResponse([
         'valid' => true,
-        'team_number' => $result['team_number']
+        'team_number' => $main['team_number'],
+        'name' => trim(($main['first_name'] ?? '') . ' ' . ($main['last_name'] ?? '')),
+        'is_sub_account' => false,
     ]);
-
-} catch (PDOException $e) {
-    error_log("Token validation error: " . $e->getMessage());
-    http_response_code(500);
-    exit;
 }
+
+// Try sub account
+$stmt = $db->prepare("
+    SELECT sa.id, sa.name, sa.assigned_teams, u.team_number
+    FROM auth_tokens at
+    JOIN sub_accounts sa ON at.sub_account_id = sa.id
+    JOIN users u ON sa.parent_user_id = u.id
+    WHERE at.token = ?
+    AND at.sub_account_id IS NOT NULL
+    AND at.expires_at > CURRENT_TIMESTAMP
+    AND at.is_revoked = 0
+    AND sa.is_active = 1
+");
+$stmt->execute([$token]);
+$sub = $stmt->fetch();
+
+if ($sub) {
+    if ($sub['team_number'] === null) {
+        http_response_code(501);
+        exit;
+    }
+    jsonResponse([
+        'valid' => true,
+        'team_number' => $sub['team_number'],
+        'name' => $sub['name'],
+        'is_sub_account' => true,
+        'assigned_teams' => json_decode($sub['assigned_teams'] ?: '[]', true) ?: [],
+    ]);
+}
+
+http_response_code(401);
+exit;
 ?>

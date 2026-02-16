@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Trading Card | WikiScout</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      min-height: 100vh;
+      font-family: 'Rajdhani', var(--font-sans);
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1a 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+    
+    /* Animated background */
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .bg-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(150px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .bg-glow-1 {
+      background: var(--primary);
+      top: -200px;
+      right: -200px;
+    }
+    
+    .bg-glow-2 {
+      background: var(--purple);
+      bottom: -200px;
+      left: -200px;
+    }
+    
+    /* Container */
+    .card-page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-3xl);
+    }
+    
+    /* Header */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: var(--space-3xl);
+    }
+    
+    .card-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    
+    .card-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: var(--text-lg);
+      color: white;
+      font-family: 'Orbitron', monospace;
+    }
+    
+    .card-logo-text {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .card-logo-text span {
+      color: var(--primary);
+    }
+    
+    .card-actions {
+      display: flex;
+      gap: var(--space-md);
+    }
+    
+    .card-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-xl);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-lg);
+      color: var(--text-secondary);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    
+    .card-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+    
+    .card-btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    .card-btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .card-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    /* Trading Card */
+    .trading-card {
+      width: 100%;
+      max-width: 800px;
+      background: linear-gradient(145deg, rgba(16, 16, 24, 0.9) 0%, rgba(10, 10, 16, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-2xl);
+      overflow: hidden;
+      box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Card Image Section */
+    .card-image-section {
+      position: relative;
+      background: linear-gradient(180deg, #0a0a12 0%, #14141e 100%);
+      overflow: hidden;
+    }
+    
+    .card-robot-image {
+      width: 100%;
+      display: block;
+    }
+    
+    .card-image-placeholder {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-lg);
+      background: radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    }
+    
+    .card-image-placeholder svg {
+      width: 80px;
+      height: 80px;
+      color: var(--text-disabled);
+    }
+    
+    .card-image-placeholder span {
+      color: var(--text-muted);
+      font-size: var(--text-lg);
+    }
+    
+    /* Team Badge Overlay */
+    .card-team-badge {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: var(--space-2xl) var(--space-3xl);
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    }
+    
+    .card-team-number {
+      font-family: 'Orbitron', monospace;
+      font-size: 4rem;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+      line-height: 1;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .card-season {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--text-sm);
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+    
+    /* Card Stats Section */
+    .card-content {
+      padding: var(--space-3xl);
+    }
+    
+    .card-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-lg);
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .card-stat {
+      text-align: center;
+      padding: var(--space-xl);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-xl);
+    }
+    
+    .card-stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--text-3xl);
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: var(--space-xs);
+    }
+    
+    .card-stat-label {
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+    }
+    
+    /* Capabilities */
+    .card-caps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .card-cap-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-sm) var(--space-lg);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: #10b981;
+    }
+    
+    .card-cap-tag svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .card-cap-tag.drive {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: rgba(139, 92, 246, 0.25);
+      color: #8b5cf6;
+    }
+    
+    /* Descriptions */
+    .card-desc-group {
+      margin-bottom: var(--space-xl);
+    }
+    
+    .card-desc-title {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--text-sm);
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .card-desc-text {
+      color: var(--text-secondary);
+      font-size: var(--text-base);
+      line-height: 1.6;
+    }
+    
+    .card-section-divider {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin: var(--space-2xl) 0;
+    }
+    
+    /* QR Code Section */
+    .card-qr-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: var(--space-2xl);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: var(--space-2xl);
+    }
+    
+    .card-qr-info {
+      flex: 1;
+    }
+    
+    .card-qr-title {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--text-lg);
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .card-qr-url {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    
+    .card-qr-code {
+      padding: var(--space-sm);
+      background: white;
+      border-radius: var(--radius-lg);
+    }
+    
+    .card-qr-code img {
+      width: 80px;
+      height: 80px;
+      display: block;
+    }
+    
+    /* Loading State */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      gap: var(--space-xl);
+    }
+    
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(59, 130, 246, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      font-family: 'Orbitron', monospace;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    /* Error State */
+    .error-container {
+      text-align: center;
+      padding: var(--space-4xl);
+    }
+    
+    .error-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-xl);
+    }
+    
+    .error-icon svg {
+      width: 40px;
+      height: 40px;
+      color: var(--danger);
+    }
+    
+    .error-title {
+      font-family: 'Orbitron', monospace;
+      font-size: var(--text-2xl);
+      margin-bottom: var(--space-md);
+    }
+    
+    .error-text {
+      color: var(--text-muted);
+      margin-bottom: var(--space-2xl);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .card-page {
+        padding: var(--space-lg);
+      }
+      
+      .card-header {
+        flex-direction: column;
+        gap: var(--space-lg);
+        text-align: center;
+      }
+      
+      .card-team-number {
+        font-size: 2.5rem;
+      }
+      
+      .card-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .card-content {
+        padding: var(--space-xl);
+      }
+      
+      .card-qr-section {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-xl);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  
+  <div class="card-page">
+    <!-- Header -->
+    <header class="card-header">
+      <a href="index.html" class="card-logo">
+        <div class="card-logo-icon">W</div>
+        <div class="card-logo-text">Wiki<span>Scout</span></div>
+      </a>
+      
+      <div class="card-actions">
+        <button class="card-btn" id="shareBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          Share
+        </button>
+        <a href="dashboard.html" class="card-btn card-btn-primary" id="importBtn" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M8 11l4 4 4-4"></path><path d="M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4"></path></svg>
+          Import to WikiScout
+        </a>
+      </div>
+    </header>
+    
+    <!-- Trading Card -->
+    <div class="trading-card" id="tradingCard">
+      <!-- Loading State -->
+      <div class="loading-container" id="loadingState">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Profile...</div>
+      </div>
+      
+      <!-- Error State -->
+      <div class="error-container" id="errorState" style="display: none;">
+        <div class="error-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        </div>
+        <h2 class="error-title">Profile Not Found</h2>
+        <p class="error-text">This trading card doesn't exist or has been made private.</p>
+        <a href="index.html" class="card-btn card-btn-primary">Go to WikiScout</a>
+      </div>
+      
+      <!-- Card Content (loaded dynamically) -->
+      <div id="cardContent" style="display: none;"></div>
+    </div>
+  </div>
+  
+  <script>
+    const API_BASE = 'https://api.wikiscout.org'; // Update with your API URL
+    
+    // Get profile slug from URL (supports /card/SLUG or /card.html?slug=SLUG)
+    function getProfileSlug() {
+      // Try query parameter first
+      const params = new URLSearchParams(window.location.search);
+      const qSlug = params.get('slug');
+      if (qSlug) return qSlug;
+      
+      // Try path-based
+      const path = window.location.pathname;
+      const match = path.match(/\/card\/([a-zA-Z0-9-]+)/);
+      return match ? match[1] : null;
+    }
+    
+    // Format capability name
+    function formatCapability(name) {
+      return name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+    
+    // Render trading card with stats, capabilities, descriptions
+    function renderCard(profile) {
+      // Pick the best available image: final > rendered > original
+      const imageUrl = profile.final_image_url || profile.rendered_image_url || profile.original_image_url;
+      
+      // Build capabilities tags
+      const caps = [];
+      if (profile.can_climb) caps.push('Can Climb' + (profile.climb_level ? ` (${profile.climb_level})` : ''));
+      if (profile.can_shoot_near) caps.push('Shoot Near');
+      if (profile.can_shoot_far) caps.push('Shoot Far');
+      if (profile.can_intake_ground) caps.push('Ground Intake');
+      if (profile.can_intake_source) caps.push('Source Intake');
+      
+      // Build descriptions
+      let descHtml = '';
+      if (profile.robot_description) {
+        descHtml += `<div class="card-desc-group"><div class="card-desc-title">Robot Description</div><div class="card-desc-text">${escapeHtml(profile.robot_description)}</div></div>`;
+      }
+      if (profile.auto_description) {
+        descHtml += `<div class="card-desc-group"><div class="card-desc-title">Autonomous</div><div class="card-desc-text">${escapeHtml(profile.auto_description)}</div></div>`;
+      }
+      if (profile.strategy_notes) {
+        descHtml += `<div class="card-desc-group"><div class="card-desc-title">Strategy</div><div class="card-desc-text">${escapeHtml(profile.strategy_notes)}</div></div>`;
+      }
+      
+      document.getElementById('cardContent').innerHTML = `
+        <!-- Image Section -->
+        <div class="card-image-section">
+          ${imageUrl 
+            ? `<img src="${imageUrl}" alt="Team ${profile.team_number} Robot" class="card-robot-image">`
+            : `<div class="card-image-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>
+                <span>No Robot Image</span>
+              </div>`
+          }
+          <div class="card-team-badge">
+            <div class="card-team-number">${profile.team_number}</div>
+            <div class="card-season">${profile.season_year} Season</div>
+          </div>
+        </div>
+        
+        <!-- Stats & Info -->
+        <div class="card-content">
+          <!-- Performance Stats -->
+          <div class="card-stats">
+            <div class="card-stat">
+              <div class="card-stat-value">${profile.auto_points_low || 0}-${profile.auto_points_high || 0}</div>
+              <div class="card-stat-label">Auto Points</div>
+            </div>
+            <div class="card-stat">
+              <div class="card-stat-value">${profile.teleop_points_low || 0}-${profile.teleop_points_high || 0}</div>
+              <div class="card-stat-label">Teleop Points</div>
+            </div>
+            <div class="card-stat">
+              <div class="card-stat-value">${profile.endgame_points || 0}</div>
+              <div class="card-stat-label">Endgame</div>
+            </div>
+          </div>
+          
+          <!-- Capabilities -->
+          ${caps.length > 0 ? `
+          <div class="card-caps">
+            ${caps.map(c => `<span class="card-cap-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>${c}</span>`).join('')}
+            ${profile.drivetrain_type ? `<span class="card-cap-tag drive">${profile.drivetrain_type} Drive</span>` : ''}
+          </div>` : ''}
+          
+          <!-- Descriptions -->
+          ${descHtml ? `${descHtml}<hr class="card-section-divider">` : ''}
+          
+          <!-- QR / Share -->
+          <div class="card-qr-section">
+            <div class="card-qr-info">
+              <div class="card-qr-title">Share This Card</div>
+              <div class="card-qr-url">${window.location.href}</div>
+            </div>
+            <div class="card-qr-code">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(window.location.href)}" alt="QR Code">
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Load profile
+    async function loadProfile() {
+      const slug = getProfileSlug();
+      
+      if (!slug) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE}/card/${slug}`);
+        const data = await response.json();
+        
+        if (!response.ok || !data.profile) {
+          document.getElementById('loadingState').style.display = 'none';
+          document.getElementById('errorState').style.display = 'block';
+          return;
+        }
+        
+        // Render card
+        renderCard(data.profile);
+        
+        // Update page title
+        document.title = `Team ${data.profile.team_number} | WikiScout Trading Card`;
+        
+        // Show import button and set data attribute
+        const importBtn = document.getElementById('importBtn');
+        importBtn.style.display = 'inline-flex';
+        importBtn.dataset.slug = slug;
+        
+        // Hide loading, show content
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('cardContent').style.display = 'block';
+        
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+      }
+    }
+    
+    // Share functionality
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+      const url = window.location.href;
+      
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: document.title,
+            url: url
+          });
+        } catch (err) {
+          // User cancelled or error
+        }
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(url);
+        alert('Link copied to clipboard!');
+      }
+    });
+    
+    // Import button click
+    document.getElementById('importBtn').addEventListener('click', (e) => {
+      const slug = e.currentTarget.dataset.slug;
+      // Store slug for import after login
+      sessionStorage.setItem('importProfileSlug', slug);
+      // Redirect to dashboard
+      window.location.href = 'dashboard.html?import=' + slug;
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', loadProfile);
+  </script>
+</body>
+</html>
